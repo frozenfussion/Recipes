@@ -69,6 +69,24 @@ export function fakeAi(overrides = {}) {
         ];
       },
       async checkKey(key) { calls.anthropic.push(['checkKey', key]); },
+      // Default recipe: the sample one. A refine request changes the title and adds a step.
+      async generateRecipe(args) {
+        calls.anthropic.push(['generateRecipe', args]);
+        const request = args.messages[0].content;
+        const refine = request.match(/Please change it like this: (.*)\n/);
+        return {
+          recipe: refine
+            ? sampleRecipe({ title: 'Garlicky Chicken & Spinach Rice (refined)', steps: [...sampleRecipe().steps, `Refined: ${refine[1]}`] })
+            : sampleRecipe(),
+          text: refine ? 'I made it a bit different.' : 'Here you go!',
+        };
+      },
+      async streamChat(args) {
+        calls.anthropic.push(['streamChat', args]);
+        args.onText('Hello ');
+        args.onText('there!');
+        return 'Hello there!';
+      },
     },
     openai: {
       async listModels(key) {

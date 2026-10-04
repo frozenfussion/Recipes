@@ -1,8 +1,8 @@
-import { api } from '../api.js';
+import { api, ApiClientError, streamPost } from '../api.js';
 import { closeDialog, confirmBox, openDialog } from '../components/dialog.js';
 import { statusBadge } from '../components/session-card.js';
 import { toast } from '../components/toast.js';
-import { errorBox, formatDate, h, loadingBox, setChildren } from '../dom.js';
+import { errorBox, formatDate, h, loadingBox, setChildren, spinner } from '../dom.js';
 import { show } from '../router.js';
 import { resetCook, state } from '../state.js';
 
@@ -143,12 +143,45 @@ function paint(root, session, isCurrent) {
         ? h('div', { class: 'note' }, m.content)
         : h('div', { class: `msg ${m.role}` }, m.content))));
     const input = h('input', { class: 'field', placeholder: 'Ask a question…', autocomplete: 'off', 'aria-label': 'Ask Chef Buddy', maxlength: '2000' });
-    const form = h('form', { class: 'sendrow' }, input, h('button', { class: 'btn' }, 'Send'));
-    form.addEventListener('submit', (event) => {
+    const sendBtn = h('button', { class: 'btn' }, 'Send');
+    const form = h('form', { class: 'sendrow' }, input, sendBtn);
+    const scrollDown = () => { box.scrollTop = box.scrollHeight; };
+
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (input.value.trim()) toast('Chat arrives in Phase 4');
+      const text = input.value.trim();
+      if (!text || sendBtn.disabled) return;
+      input.value = '';
+      sendBtn.disabled = true;
+      box.append(h('div', { class: 'msg user' }, text));
+      // The reply is added piece by piece with textContent, so AI text can never become HTML.
+      const bubble = h('div', { class: 'msg assistant' }, spinner());
+      box.append(bubble);
+      scrollDown();
+      session.messages.push({ role: 'user', content: text });
+      let reply = '';
+      try {
+        await streamPost(`/sessions/${session.id}/messages`, { content: text }, (name, data) => {
+          if (name === 'delta') {
+            reply += data.text;
+            bubble.textContent = reply;
+            scrollDown();
+          } else if (name === 'error') {
+            throw new ApiClientError(data.message, data.code, 0);
+          }
+        });
+        session.messages.push({ role: 'assistant', content: reply });
+      } catch (err) {
+        if (!reply) bubble.remove();
+        box.append(h('div', { class: 'note' }, err.message));
+        scrollDown();
+        toast(err.message, { error: true });
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
     });
-    queueMicrotask(() => { box.scrollTop = box.scrollHeight; });
+    queueMicrotask(scrollDown);
     return h('div', { class: 'card' }, h('h2', null, 'Ask Chef Buddy'), box, form);
   }
 
@@ -164,12 +197,26 @@ function paint(root, session, isCurrent) {
       return chip;
     });
     const text = h('textarea', { placeholder: 'Or say it in your own words, e.g. swap the chicken for chickpeas…', 'aria-label': 'Refine in your own words', maxlength: '2000' });
+    const apply = h('button', { type: 'button', class: 'btn sm' }, 'Update recipe');
+    apply.addEventListener('click', async () => {
+      if (!picked.size && !text.value.trim()) { toast('Pick an option or say what to change first.'); return; }
+      apply.disabled = true;
+      setChildren(apply, spinner(), ' Updating…');
+      try {
+        const updated = await api('POST', `/sessions/${session.id}/refine`, { chips: [...picked], text: text.value.trim() });
+        repaint(updated);
+        toast('Recipe refined');
+      } catch (err) {
+        toast(err.message, { error: true });
+        apply.disabled = false;
+        setChildren(apply, 'Update recipe');
+      }
+    });
     return [
       h('h3', null, 'Refine this recipe'),
       h('div', { class: 'chips' }, chips),
       text,
-      h('div', { class: 'row stack' },
-        h('button', { type: 'button', class: 'btn sm', onclick: () => toast('Refine arrives in Phase 4') }, 'Update recipe'),
+      h('div', { class: 'row stack' }, apply,
         h('button', { type: 'button', class: 'btn ghost sm', onclick: () => { refinePanel.hidden = true; } }, 'Cancel')),
     ];
   }
