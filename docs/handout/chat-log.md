@@ -90,3 +90,9 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 3. **Use manual mode** when the task touches secrets, deleting things, or anything you do not fully understand.
 4. **Never use bypass permissions on your own PC.**
 5. Auto mode is not a reason to stop reviewing. Run the app, read the diff (`git diff`), and ask Claude to explain.
+
+## Session 1 – Claude Code's first plan (Phase 0)
+- Screenshot `08-claude-code-phase0-plan-approval.png`: Claude Code asks to proceed: 1. Yes and use auto mode, 2. Yes, manually approve edits, 3. Tell Claude what to change. (The full plan is saved on Aziz's PC under `~\.claude\plans\`.)
+- What the plan did well (teaching points): it summarised the project in its own words; it found a real blocker (Node.js not installed or not on PATH); it listed 19 gaps and risks in the specs instead of guessing; it listed exactly which files Phase 0 creates and how each will be verified; it asked 3 questions before starting.
+- Gaps worth noting in the handout: the mockup's JavaScript is not safe to port (it builds HTML from strings), so only its CSS is reused; theme without flicker needs a localStorage mirror; the spec's upload size limits contradicted each other (4 photos x 8 MB x 1.33 > 25 MB), to be fixed in Phase 5.
+- Lesson: this is recursive refinement in action. Read the plan, answer its questions, challenge it, then approve.
