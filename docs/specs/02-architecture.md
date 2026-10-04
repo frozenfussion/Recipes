@@ -1,14 +1,14 @@
 # 02 · Architecture
 
 ## Stack
-Node.js 22+, Express, `node:sqlite`, plain JS frontend served statically, `@anthropic-ai/sdk`, `openai`. See `CLAUDE.md`.
+Node.js 22.18+, Express, `node:sqlite`, plain JS frontend served statically, `@anthropic-ai/sdk`, `openai`. See `CLAUDE.md`.
 
 ## Folders
 ```
 src/
   server.js            create the Express app, mount routes, start listening
   db.js                open the database, create tables, tiny migration helper
-  config.js            read PORT and HOST from the environment
+  config.js            read PORT and HOST from the environment or .env (BOM-safe, PORT validated)
   routes/
     settings.js        keys, models, theme
     models.js          live model lists
@@ -27,6 +27,8 @@ public/
   css/                 tokens.css (design tokens), app.css
   js/                  main.js, api.js, router.js, screens/*.js, components/*.js
   assets/              logo.svg, favicon.svg
+scripts/
+  check-node.js        runs before start/dev/test, stops with a plain message on an old Node
 test/
 data/                  git-ignored: chefbuddy.db, images/
 ```

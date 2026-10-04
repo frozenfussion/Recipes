@@ -23,7 +23,7 @@ Visual reference: open `mockups/index.html` in a browser (clickable, design A) a
 Ignore `docs/handout/`. It is the trainer's teaching material, not part of the app.
 
 ## Stack (decided, do not change without asking)
-- Node.js 22 or newer (developed on 22.22.0), plain JavaScript, ES modules.
+- Node.js 22.18 or newer (tested on 22.18.0, 22.23.3 and 24.19.0; 22.18 is the lowest because `import.meta.main` arrived there), plain JavaScript, ES modules.
 - Express for the server. No frontend framework, no bundler: plain HTML, CSS and ES-module JavaScript served from `public/`.
 - SQLite through Node's built-in `node:sqlite` (no native build step, important on Windows). It prints an "experimental" warning; hide it with the `--disable-warning=ExperimentalWarning` flag in the npm scripts.
 - Official SDKs: `@anthropic-ai/sdk` for Claude and `openai` for image generation.
@@ -51,6 +51,7 @@ docs/specs/         the specs
 mockups/            design reference, do not edit
 src/                server code (server.js, db.js, routes/, ai/, lib/)
 public/             frontend (index.html, css/, js/)
+scripts/            small helper scripts (check-node.js)
 test/               tests
 data/               git-ignored: SQLite database and image files
 ```

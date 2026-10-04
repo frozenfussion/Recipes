@@ -6,7 +6,7 @@ Work in the folder `C:\Users\User\Development\web\recipes`.
 ## 1. Install the tools (once)
 | Tool | How | Check it worked |
 |---|---|---|
-| **Node.js 22 or newer** | Download the LTS installer from https://nodejs.org and run it | `node -v` shows v22 or higher |
+| **Node.js 22.18 or newer** | Download the LTS installer from https://nodejs.org and run it | `node -v` shows v22.18 or higher |
 | **Git for Windows** | Download from https://git-scm.com/downloads/win and run it (defaults are fine) | `git --version` |
 | **Claude Code** | see the command just below the table | open a **new** terminal, then `claude --version` |
 

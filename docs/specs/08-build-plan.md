@@ -3,7 +3,8 @@
 Work **one phase at a time**. At the start of each phase: say what you will build and which files you will touch, wait for approval. At the end: run it, run `npm test`, report what you checked, commit, and stop for review. The trainer reviews each phase and may ask for changes. That is intended. Do not rush ahead.
 
 ## Phase 0 · Skeleton
-Build: `package.json` (scripts `start`, `dev`, `test`), folders from `02-architecture.md`, Express serving `public/`, `GET /api/health`, SQLite opened at `data/chefbuddy.db` with a `schema_version`, `.env` handling for `PORT` and `HOST`, a first test.
+Build: `package.json` (scripts `start`, `dev`, `test`), folders from `02-architecture.md`, Express serving `public/`, `GET /api/health`, SQLite opened at `data/chefbuddy.db` with a `schema_version` and transactional migrations, `.env` handling for `PORT` and `HOST` (BOM-safe, `PORT` validated), a Node version check (`scripts/check-node.js`), clear messages for a busy port, a first test.
+Status: done, plus a hardening follow-up (startup errors, `.env` BOM, migration rollback, Node 22.18 minimum, `.gitattributes`).
 Check: `npm install && npm start` works on Windows; `http://localhost:3000` shows a placeholder page; `/api/health` returns ok; `npm test` passes; no ExperimentalWarning noise; `data/` is git-ignored.
 
 ## Phase 1 · Design system and app shell
@@ -31,7 +32,7 @@ Build: `src/ai/openai.js`; `POST /api/sessions/:id/ai-photo`; the **AI photo** b
 Check: one image per press; default quality low; policy refusal and missing key give friendly messages; the user's own photo takes priority over the AI photo.
 
 ## Phase 7 · Polish and hand-over
-Build: empty, loading and error states everywhere; accessibility pass; rate limit and CSP; README with install and run steps for Windows (Node 22, `npm install`, `npm start`, adding keys, optional phone testing with `HOST=0.0.0.0` and the firewall note); update specs where reality differs from them.
+Build: empty, loading and error states everywhere; accessibility pass; rate limit and CSP; README with install and run steps for Windows (Node 22.18 or newer, `npm install`, `npm start`, adding keys, optional phone testing with `HOST=0.0.0.0` and the firewall note); update specs where reality differs from them.
 Check: full run-through of the user journey in `01-overview.md` on desktop and phone width, light and dark; `npm test` green; fresh clone to working app in under 10 minutes following only the README.
 
 ## Later (not part of this build)

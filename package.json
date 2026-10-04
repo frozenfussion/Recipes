@@ -5,12 +5,12 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "scripts": {
-    "start": "node --disable-warning=ExperimentalWarning src/server.js",
-    "dev": "node --disable-warning=ExperimentalWarning --watch-path=src --watch-path=public src/server.js",
-    "test": "node --disable-warning=ExperimentalWarning --test"
+    "start": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --watch-path=src --watch-path=public src/server.js",
+    "test": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --test"
   },
   "dependencies": {
     "express": "^5.1.0"
