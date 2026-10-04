@@ -126,3 +126,7 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - New: `scripts/check-node.js`, `.gitattributes` (`* text=auto eol=lf`), README troubleshooting section (busy port, old Node, PowerShell script policy, OneDrive, Notepad BOM).
 - Still unchecked by Claude Code: `npm run dev` and a real browser. Aziz checks these himself.
 - Open issue it flagged itself: startup tests use the real `data/chefbuddy.db`. Fix before Phase 2, when API keys will live in that database: tests must use a temporary folder.
+
+## Session 1 – Tests use a temporary folder (screenshot 11)
+- `11-claude-code-tests-use-temp-folder.png`: commit `80bbb89`. `npm test` now uses a temporary data folder (`DATA_DIR`), deleted afterwards, so it never touches `data/chefbuddy.db`. 22 of 22 tests pass. Claude Code proved it by comparing file timestamps in `data/` before and after, and by renaming `data/` away and re-running the tests.
+- Aziz's decision: speed up. Keep API keys in plain text (revisit only at deployment), stop the plan-and-check rounds, and build Phases 1 to 7 in one go in auto mode, then review the finished app. Handout lesson: the trainer decides how much ceremony a project needs. For a small local app, fewer approval rounds is fine; review at the end.
