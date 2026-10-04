@@ -29,9 +29,9 @@ git config --global user.email "you@example.com"
 The project lives at https://github.com/frozenfussion/Recipes (branch `main`). Your folder is empty, so clone into it:
 ```
 cd C:\Users\User\Development\web\recipes
-git clone https://github.com/frozenfussion/Recipes .
+git clone -b main https://github.com/frozenfussion/Recipes .
 ```
-(The dot at the end means "into this folder".) A browser window may ask you to sign in to GitHub the first time. That is Git Credential Manager, it is normal.
+(`-b main` picks the main branch. The dot at the end means "into this folder".) A browser window may ask you to sign in to GitHub the first time. That is Git Credential Manager, it is normal.
 
 Check:
 ```
