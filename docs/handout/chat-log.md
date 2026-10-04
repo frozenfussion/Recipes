@@ -130,3 +130,17 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 ## Session 1 – Tests use a temporary folder (screenshot 11)
 - `11-claude-code-tests-use-temp-folder.png`: commit `80bbb89`. `npm test` now uses a temporary data folder (`DATA_DIR`), deleted afterwards, so it never touches `data/chefbuddy.db`. 22 of 22 tests pass. Claude Code proved it by comparing file timestamps in `data/` before and after, and by renaming `data/` away and re-running the tests.
 - Aziz's decision: speed up. Keep API keys in plain text (revisit only at deployment), stop the plan-and-check rounds, and build Phases 1 to 7 in one go in auto mode, then review the finished app. Handout lesson: the trainer decides how much ceremony a project needs. For a small local app, fewer approval rounds is fine; review at the end.
+
+## Session 1 – Phases 1 to 7 built in one go (screenshot 12)
+- `12-claude-code-phases-1-to-7-report.png`: Claude Code built all of Phases 1 to 7 in one auto-mode run (about 31 minutes), one commit per phase, pushed. `main` at `56beaff`.
+- Run it: `npm install`, `npm start`, open http://localhost:3000, on Settings paste the Claude key, Save key, Test, pick a model, then go to Cook. `npm run seed` adds 5 demo recipes and 2 lists. `npm test` runs 112 tests with fake AI services (no keys, no cost).
+- Built: design system and shell; Settings with masked keys and live model lists; History, My Recipes and lists; Recipe screen; Claude recipe generation, streaming chat and refine; fridge photos (shrunk in the browser) and "I cooked it!"; OpenAI AI photo; rate limits, strict Content-Security-Policy, full README.
+- One change from the spec: the newest Claude models reject a forced `tool_choice` (HTTP 400), so the app now asks for the recipe tool, validates the result and retries once. Recorded in `04-ai-integration.md`. Lesson: specs are a starting point; the AI found the real behaviour and updated the docs.
+- Extra protections it added: Host-header check and Origin check, so other websites cannot drive the running app and spend the user's credit.
+- **Checked:** 112 tests; headless Chrome click-through on all screens, light and dark, desktop and 390px, no console errors, accessibility scan clean; a 12-megapixel photo shrunk to 1568x1176; fresh clone to working app in about 13 seconds.
+- **Not checked (important):** the real Claude and OpenAI APIs were never called (no keys), so everything AI-related ran against fakes. Not tested on a real phone, with `HOST=0.0.0.0`, `npm run dev`, Safari/Firefox, or iPhone HEIC photos. Browser click-through scripts are not in the repo.
+- Lesson: "all tests pass" with fake services does not prove the real thing works. The first real recipe, chat and AI photo are the true test.
+
+### Handout section: follow the install instructions exactly
+- Aziz's instruction: tell students to follow the setup instructions step by step because of administrator rights and similar Windows gotchas.
+- Points to include: installing Node.js and Git makes Windows show a "Do you want to allow this app to make changes?" prompt (click Yes only for installs you started); open a **new** terminal after installing so it can see the new tools; run `npm install` and `npm start` from the project folder, in a normal (not administrator) terminal; if PowerShell says running scripts is disabled, follow the README's script-policy fix; keep the project folder outside OneDrive-synced folders; never paste API keys into chat or files, only into the app's Settings page.
