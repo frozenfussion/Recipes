@@ -36,7 +36,9 @@ function start() {
   let db;
   try {
     config = loadConfig(path.join(root, '.env'));
-    db = openDb(path.join(root, 'data', 'chefbuddy.db'));
+    // DATA_DIR lets the tests use a temporary folder instead of the real data/ folder.
+    const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
+    db = openDb(path.join(dataDir, 'chefbuddy.db'));
   } catch (err) {
     fail(err instanceof ConfigError ? err.message : `Could not start: ${err.message}`);
   }

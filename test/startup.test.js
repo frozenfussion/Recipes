@@ -1,7 +1,9 @@
-import { test } from 'node:test';
+import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import net from 'node:net';
 import { spawn, spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -10,10 +12,14 @@ const serverFile = path.join(root, 'src', 'server.js');
 const checkFile = path.join(root, 'scripts', 'check-node.js');
 const nodeArgs = ['--disable-warning=ExperimentalWarning'];
 
+// The spawned servers store their database here, never in the real data/ folder.
+const tempDataDir = mkdtempSync(path.join(tmpdir(), 'chefbuddy-startup-'));
+after(() => rmSync(tempDataDir, { recursive: true, force: true }));
+
 // Runs the real server.js as a separate process, like `npm start` does.
 function runServer(env) {
   return spawnSync(process.execPath, [...nodeArgs, serverFile], {
-    env: { ...process.env, ...env },
+    env: { ...process.env, DATA_DIR: tempDataDir, ...env },
     encoding: 'utf8',
     timeout: 15000,
   });
@@ -26,7 +32,7 @@ test('a port that is already in use stops with a clear message and a failing exi
   try {
     // spawnSync would freeze this process (and the blocker with it), so use async spawn.
     const child = spawn(process.execPath, [...nodeArgs, serverFile], {
-      env: { ...process.env, PORT: String(port), HOST: '127.0.0.1' },
+      env: { ...process.env, DATA_DIR: tempDataDir, PORT: String(port), HOST: '127.0.0.1' },
     });
     let out = '';
     child.stdout.on('data', (d) => (out += d));
