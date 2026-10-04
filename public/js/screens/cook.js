@@ -1,4 +1,4 @@
-import { api } from '../api.js';
+import { api, SLOW_TIMEOUT_MS } from '../api.js';
 import { toggleChip } from '../components/chips.js';
 import { toast } from '../components/toast.js';
 import { errorBox, h, setChildren, spinner } from '../dom.js';
@@ -139,7 +139,7 @@ export function renderCook(root) {
     try {
       const session = await api('POST', '/sessions', {
         prefs, ingredients: cook.ingredients, want: text, photos: cook.photos.map((p) => p.dataUrl),
-      });
+      }, { timeout: SLOW_TIMEOUT_MS });
       state.currentId = session.id;
       state.backTo = 'home';
       await show('recipe');

@@ -9,15 +9,23 @@ export class ApiClientError extends Error {
 }
 
 const OFFLINE = "Can't reach Chef Buddy's server. Is it still running? Start it again with npm start.";
+const TOO_SLOW = 'Chef Buddy is taking too long to answer. Check your internet connection (a VPN, proxy or firewall can block it) and try again.';
 
-async function send(method, path, body) {
+// How long to wait for the server before giving up. Recipes and pictures are slow on purpose, so they ask for more.
+export const DEFAULT_TIMEOUT_MS = 60_000;
+export const SLOW_TIMEOUT_MS = 240_000;
+
+// timeout 0 means "no limit" (used for streamed chat, which can legitimately run for a while).
+async function send(method, path, body, timeout = DEFAULT_TIMEOUT_MS) {
   try {
     return await fetch(`/api${path}`, {
       method,
       headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
+      signal: timeout > 0 ? AbortSignal.timeout(timeout) : undefined,
     });
-  } catch {
+  } catch (err) {
+    if (err && err.name === 'TimeoutError') throw new ApiClientError(TOO_SLOW, 'timeout', 0);
     throw new ApiClientError(OFFLINE, 'offline', 0);
   }
 }
@@ -29,16 +37,23 @@ async function failure(res) {
   return new ApiClientError(error.message || `Something went wrong (error ${res.status}).`, error.code || 'error', res.status);
 }
 
-export async function api(method, path, body) {
-  const res = await send(method, path, body);
+// options.timeout: milliseconds to wait (see DEFAULT_TIMEOUT_MS and SLOW_TIMEOUT_MS above).
+export async function api(method, path, body, { timeout } = {}) {
+  const res = await send(method, path, body, timeout);
   if (!res.ok) throw await failure(res);
-  return res.json();
+  try {
+    return await res.json();
+  } catch (err) {
+    // The timer also covers reading the body, so a stall half-way through ends up here.
+    if (err && err.name === 'TimeoutError') throw new ApiClientError(TOO_SLOW, 'timeout', 0);
+    throw err;
+  }
 }
 
 // Server-Sent Events over POST (the browser's EventSource only does GET).
 // Calls onEvent(name, data) for every event. Resolves when the stream ends.
 export async function streamPost(path, body, onEvent) {
-  const res = await send('POST', path, body);
+  const res = await send('POST', path, body, 0);
   if (!res.ok) throw await failure(res);
   const reader = res.body.getReader();
   const decoder = new TextDecoder();

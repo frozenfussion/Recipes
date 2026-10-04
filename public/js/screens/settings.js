@@ -85,7 +85,7 @@ function fillCard(host, cfg, settings) {
   testBtn.addEventListener('click', async () => {
     testBtn.disabled = true;
     try {
-      await api('POST', cfg.testPath, keyInput.value.trim() ? { apiKey: keyInput.value.trim() } : {});
+      await api('POST', cfg.testPath, keyInput.value.trim() ? { apiKey: keyInput.value.trim() } : {}, { timeout: 25_000 });
       keyStatus.textContent = 'Key OK';
       toast(`${cfg.vendor} key works`);
     } catch (err) {
@@ -167,7 +167,8 @@ function fillCard(host, cfg, settings) {
     if (!info.hasKey) return;
     refreshBtn.disabled = true;
     try {
-      const data = await api('GET', `${cfg.modelsPath}${refresh ? '?refresh=1' : ''}`);
+      // The server gives up on the vendor after 15 seconds; we wait a little longer than that.
+      const data = await api('GET', `${cfg.modelsPath}${refresh ? '?refresh=1' : ''}`, undefined, { timeout: 25_000 });
       current = data;
       select.replaceChildren();
       if (data.saved && data.savedMissing) select.append(h('option', { value: data.saved }, `${data.saved} (not available)`));

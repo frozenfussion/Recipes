@@ -52,6 +52,9 @@ Persona: a friendly, practical home-cooking assistant called Chef Buddy. Rules t
 - Keep chat answers short and practical. Offer substitutions when the user cannot find an ingredient.
 - Never invent that a photo shows something it does not. Say when unsure.
 
+### Timeouts
+The SDKs wait 10 minutes by default and retry, so a stalled connection looks like a spinner that never stops. Every call sets its own limit (`src/ai/timeouts.js`): 15 seconds and no retry for model lists and key tests, 3 minutes for a recipe, 2 minutes for the start of a chat answer or a picture. The browser has its own limits too (25 seconds on Settings, 60 seconds normally, 4 minutes for recipes and pictures). A timeout is shown as "... did not answer in time. Check your internet connection (a VPN, proxy or firewall can block it)". The server prints one safe line per failure (error class, HTTP status, network code, never the message or the key), and `npm run check:network` tests DNS, the connection and a request for both vendors.
+
 ### Errors to map to friendly messages
 Missing key, 401 (bad key), 429 (rate limit, try again shortly), 529 or 5xx (service busy), model not found (go to Settings), request too large (photo too big), network failure.
 

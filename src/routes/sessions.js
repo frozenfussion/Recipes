@@ -4,7 +4,7 @@ import { transaction } from '../db.js';
 import {
   chatHistory, claudeSettings, generateValidRecipe, parseChatMessage, parseCookInput, parseRefine, requestSummary,
 } from '../lib/chef.js';
-import { ApiError, friendlyAiError } from '../lib/errors.js';
+import { ApiError, friendlyAiError, logAiFailure } from '../lib/errors.js';
 import { decodeImage, decodePhotos, deleteImageFiles, detectImageType, saveImage } from '../lib/images.js';
 import { resolveModel } from '../lib/models.js';
 import { getSetting } from '../lib/settings.js';
@@ -97,6 +97,7 @@ export function sessionsRouter(db, { ai, imagesDir, limiters }) {
     try {
       image = await ai.openai.generateImage({ apiKey, model, quality, prompt: buildImagePrompt(session.recipe) });
     } catch (err) {
+      logAiFailure('OpenAI', 'AI photo', err);
       throw friendlyAiError(err, 'OpenAI');
     }
     const mime = detectImageType(image.buffer);
@@ -149,6 +150,7 @@ export function sessionsRouter(db, { ai, imagesDir, limiters }) {
       send('done', { message: { id: messageId, role: 'assistant', content: reply } });
     } catch (err) {
       if (!controller.signal.aborted) {
+        logAiFailure('Claude', 'chat', err);
         const friendly = err instanceof ApiError ? err : friendlyAiError(err, 'Claude');
         send('error', { code: friendly.code, message: friendly.message });
       }

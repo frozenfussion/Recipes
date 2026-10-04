@@ -29,6 +29,7 @@ Other commands:
 npm run dev     same as start, restarting when you change files in src/ or public/
 npm test        run the tests (they use fake AI services: no keys, no cost)
 npm run seed    add 5 demo recipes and 2 lists, so the screens have something to show
+npm run check:network   test whether this computer can reach Claude and OpenAI (sends no key)
 ```
 Optional: copy `.env.example` to `.env` to change `PORT` or `HOST`.
 
@@ -62,6 +63,7 @@ Optional: copy `.env.example` to `.env` to change `PORT` or `HOST`.
 - **PowerShell says "running scripts is disabled"** when you type `npm`: run this once, then try again:
   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
   (or use `npm.cmd` instead of `npm`, or use CMD).
+- **Refresh, Test or a recipe says "did not answer in time" or "Could not reach"**: this computer cannot reach Claude or OpenAI right now. Run `npm run check:network`. It tests DNS, the connection and a request for each service and shows where it stops. The usual causes are a VPN, a proxy, a firewall or antivirus blocking Node.js, or the internet being down. The server window also prints one line saying what failed (never your key). Model lists and key tests give up after 15 seconds; recipes after 3 minutes.
 - **"No Claude API key yet"**: add one on the Settings page.
 - **"This model is no longer available"**: the model you picked was retired. Pick another on Settings (press **Refresh** first).
 - **Keep the project folder out of OneDrive.** The app keeps its database in `data/`, and OneDrive syncing can lock or duplicate database files. `C:\Users\<you>\Development\...` is a good place; Desktop and Documents are often synced.

@@ -1,4 +1,4 @@
-import { api, ApiClientError, streamPost } from '../api.js';
+import { api, ApiClientError, SLOW_TIMEOUT_MS, streamPost } from '../api.js';
 import { closeDialog, confirmBox, openDialog } from '../components/dialog.js';
 import { statusBadge } from '../components/session-card.js';
 import { toast } from '../components/toast.js';
@@ -217,7 +217,7 @@ function paint(root, session, isCurrent) {
       apply.disabled = true;
       setChildren(apply, spinner(), ' Updating…');
       try {
-        const updated = await api('POST', `/sessions/${session.id}/refine`, { chips: [...picked], text: text.value.trim() });
+        const updated = await api('POST', `/sessions/${session.id}/refine`, { chips: [...picked], text: text.value.trim() }, { timeout: SLOW_TIMEOUT_MS });
         repaint(updated);
         toast('Recipe refined');
       } catch (err) {
@@ -296,7 +296,7 @@ function paint(root, session, isCurrent) {
     button.disabled = true;
     setChildren(button, spinner(), ' Painting…');
     try {
-      repaint(await api('POST', `/sessions/${session.id}/ai-photo`));
+      repaint(await api('POST', `/sessions/${session.id}/ai-photo`, undefined, { timeout: SLOW_TIMEOUT_MS }));
       toast('AI photo ready');
     } catch (err) {
       toast(err.message, { error: true });

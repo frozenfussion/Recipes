@@ -1,5 +1,5 @@
 import { buildSystemPrompt } from '../ai/prompts.js';
-import { ApiError, friendlyAiError } from './errors.js';
+import { ApiError, friendlyAiError, logAiFailure } from './errors.js';
 import { validateRecipe } from './recipe.js';
 import { getSetting } from './settings.js';
 import { resolveModel } from './models.js';
@@ -82,6 +82,7 @@ export async function generateValidRecipe(ai, { apiKey, model, prefs, messages, 
     try {
       result = await ai.anthropic.generateRecipe({ apiKey, model, system, messages });
     } catch (err) {
+      logAiFailure('Claude', 'recipe request', err);
       throw friendlyAiError(err, 'Claude');
     }
     if (!result.recipe) {

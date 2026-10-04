@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ApiError, friendlyAiError } from '../lib/errors.js';
+import { ApiError, friendlyAiError, logAiFailure } from '../lib/errors.js';
 import { maskKey } from '../lib/mask.js';
 import { deleteSetting, getSetting, setSetting } from '../lib/settings.js';
 import { providerConfig } from '../lib/models.js';
@@ -95,6 +95,7 @@ export function settingsRouter(db, ai, limiter) {
       try {
         await ai[cfg.service].checkKey(apiKey);
       } catch (err) {
+        logAiFailure(cfg.label, 'key test', err);
         throw friendlyAiError(err, cfg.label);
       }
       res.json({ ok: true });

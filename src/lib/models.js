@@ -1,4 +1,4 @@
-import { ApiError, friendlyAiError } from './errors.js';
+import { ApiError, friendlyAiError, logAiFailure } from './errors.js';
 import { getSetting, setSetting } from './settings.js';
 
 // Live model lists from the vendors, cached in the settings table for 24 hours.
@@ -61,6 +61,7 @@ export async function loadModels(db, ai, provider, { refresh = false, now = Date
     setSetting(db, cfg.cacheSetting, JSON.stringify(result));
     return result;
   } catch (err) {
+    logAiFailure(cfg.label, 'model list', err);
     // A stale list is better than no list when the network is down, unless the user asked to refresh.
     if (cache && !refresh) return cache;
     throw friendlyAiError(err, cfg.label);
