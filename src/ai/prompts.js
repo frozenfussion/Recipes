@@ -52,6 +52,18 @@ export function recipeToText(recipe) {
   return lines.join('\n');
 }
 
+// The content of the first user message: for each photo a label and the image, then the request text.
+// Images go before the text and are labelled "Image 1:", "Image 2:"... as the Claude docs recommend.
+export function buildRecipeContent({ ingredients = [], want = '', photos = [] }) {
+  const text = buildRecipeRequest({ ingredients, want, photoCount: photos.length });
+  if (!photos.length) return text;
+  const blocks = photos.flatMap((photo, index) => [
+    { type: 'text', text: `Image ${index + 1}:` },
+    { type: 'image', source: { type: 'base64', media_type: photo.mime, data: photo.buffer.toString('base64') } },
+  ]);
+  return [...blocks, { type: 'text', text }];
+}
+
 // The message that asks for a first recipe. photoCount tells Claude how many images come before the text.
 export function buildRecipeRequest({ ingredients = [], want = '', photoCount = 0 }) {
   const lines = [];

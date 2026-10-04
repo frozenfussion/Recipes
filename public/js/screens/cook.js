@@ -2,6 +2,7 @@ import { api } from '../api.js';
 import { toggleChip } from '../components/chips.js';
 import { toast } from '../components/toast.js';
 import { errorBox, h, setChildren, spinner } from '../dom.js';
+import { resizeImage } from '../image.js';
 import { show } from '../router.js';
 import { state } from '../state.js';
 
@@ -84,6 +85,39 @@ export function renderCook(root) {
     if (event.key === 'Enter') { event.preventDefault(); addIngredient(); }
   });
 
+  /* photos: shrunk in the browser first (see image.js) */
+  const MAX_PHOTOS = 4;
+  const thumbs = h('div', { class: 'thumbs' });
+  const paintThumbs = () => setChildren(thumbs, cook.photos.map((photo, index) => {
+    const remove = h('button', { type: 'button', 'aria-label': `Remove photo ${index + 1}` }, '✕');
+    remove.addEventListener('click', () => { cook.photos.splice(index, 1); paintThumbs(); });
+    return h('div', { class: 't' }, h('img', { src: photo.dataUrl, alt: `Photo ${index + 1} of your fridge` }), remove);
+  }));
+  const fileInput = h('input', {
+    type: 'file', id: 'photoIn', class: 'visually-hidden', accept: 'image/*', capture: 'environment', multiple: true, 'aria-label': 'Choose photos of your fridge',
+  });
+  const photoNote = h('span', { class: 'small', 'aria-live': 'polite' }, 'Chef Buddy will spot the ingredients for you');
+  fileInput.addEventListener('change', async () => {
+    const files = [...fileInput.files];
+    fileInput.value = ''; // so choosing the same photo again still triggers a change
+    const room = MAX_PHOTOS - cook.photos.length;
+    if (files.length > room) toast(`You can add up to ${MAX_PHOTOS} photos. I kept the first ${Math.max(room, 0)}.`);
+    photoNote.textContent = 'Reading your photos…';
+    for (const file of files.slice(0, Math.max(room, 0))) {
+      try {
+        cook.photos.push(await resizeImage(file));
+      } catch (err) {
+        toast(err.message, { error: true });
+      }
+    }
+    photoNote.textContent = 'Chef Buddy will spot the ingredients for you';
+    paintThumbs();
+  });
+  const drop = h('div', { class: 'drop' },
+    '📷 ', h('b', null, 'Snap or upload a photo'), h('br'), photoNote, h('br'),
+    h('button', { type: 'button', class: 'btn alt sm', onclick: () => fileInput.click() }, 'Choose photos'),
+    fileInput, thumbs);
+
   const want = h('textarea', { id: 'want', placeholder: 'e.g. I want to make chicken biryani. What do I need to buy?', maxlength: '2000' });
   want.value = cook.want;
   want.addEventListener('input', () => { cook.want = want.value; });
@@ -94,8 +128,8 @@ export function renderCook(root) {
   cookBtn.addEventListener('click', async () => {
     addIngredient(); // an ingredient typed but not yet confirmed with Enter still counts
     const text = want.value.trim();
-    if (!cook.ingredients.length && !text) {
-      toast('Add an ingredient, or tell me what you fancy, first.');
+    if (!cook.ingredients.length && !text && !cook.photos.length) {
+      toast('Add an ingredient, a photo, or tell me what you fancy, first.');
       ingredientInput.focus();
       return;
     }
@@ -103,7 +137,9 @@ export function renderCook(root) {
     cookBtn.disabled = true;
     setChildren(cookBtn, spinner(), ' Chef Buddy is cooking…');
     try {
-      const session = await api('POST', '/sessions', { prefs, ingredients: cook.ingredients, want: text });
+      const session = await api('POST', '/sessions', {
+        prefs, ingredients: cook.ingredients, want: text, photos: cook.photos.map((p) => p.dataUrl),
+      });
       state.currentId = session.id;
       state.backTo = 'home';
       await show('recipe');
@@ -121,6 +157,7 @@ export function renderCook(root) {
     h('label', { class: 'lbl', for: 'ing' }, 'Ingredients in the fridge'),
     chips,
     h('div', { class: 'stack' }, ingredientInput),
+    h('div', { class: 'stack' }, drop),
     h('label', { class: 'lbl', for: 'want' }, '…or tell me what you fancy'),
     want,
     h('div', { class: 'stack' }, cookBtn),
@@ -128,4 +165,5 @@ export function renderCook(root) {
 
   setChildren(root, h('div', { class: 'grid two' }, dietCard, haveCard));
   paintChips();
+  paintThumbs();
 }

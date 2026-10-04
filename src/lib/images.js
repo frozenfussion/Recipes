@@ -32,6 +32,17 @@ export function decodeImage(value) {
   return { buffer, mime };
 }
 
+export const MAX_PHOTOS = 4;
+
+// A list of photos from the browser (up to 4). Returns [{ buffer, mime }]. The browser has already
+// shrunk them, but we never trust that: every photo is checked here too.
+export function decodePhotos(value) {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) throw new ApiError(400, 'bad_image', 'The photos could not be read. Try again.');
+  if (value.length > MAX_PHOTOS) throw new ApiError(400, 'too_many_photos', `You can add up to ${MAX_PHOTOS} photos at a time.`);
+  return value.map(decodeImage);
+}
+
 // Writes the file and records it in the images table. Returns { id, mime }.
 export function saveImage(db, imagesDir, sessionId, kind, buffer, mime) {
   mkdirSync(imagesDir, { recursive: true });

@@ -3,6 +3,7 @@ import { closeDialog, confirmBox, openDialog } from '../components/dialog.js';
 import { statusBadge } from '../components/session-card.js';
 import { toast } from '../components/toast.js';
 import { errorBox, formatDate, h, loadingBox, setChildren, spinner } from '../dom.js';
+import { resizeImage } from '../image.js';
 import { show } from '../router.js';
 import { resetCook, state } from '../state.js';
 
@@ -267,16 +268,50 @@ function paint(root, session, isCurrent) {
     });
   }
 
+  // "I cooked it!" and "My photo" / "Change photo". The photo is shrunk in the browser first.
   function cookedDialog() {
-    const doneWithout = () => run(async () => {
+    let picked = null; // a shrunk JPEG as a data URL
+    const hasPhoto = Boolean(session.photo && session.photo.kind === 'cooked');
+    const input = h('input', { type: 'file', class: 'field', accept: 'image/*', capture: 'environment', 'aria-label': 'Photo of your finished dish' });
+    const preview = h('img', { class: 'preview', alt: 'Preview of your photo', hidden: true });
+    const message = h('p', { class: 'small', 'aria-live': 'polite' });
+    const finish = (photo, successText) => run(async () => {
+      saveBtn.disabled = true;
+      const updated = await api('POST', `/sessions/${session.id}/cooked`, photo ? { photo } : {});
       closeDialog();
-      repaint(await api('PATCH', `/sessions/${session.id}`, { status: 'cooked' }));
-      toast('Marked as cooked and saved');
+      repaint(updated);
+      toast(successText);
+    }).finally(() => { saveBtn.disabled = false; });
+
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      message.textContent = 'Reading your photo…';
+      try {
+        picked = (await resizeImage(file)).dataUrl;
+        preview.src = picked;
+        preview.hidden = false;
+        message.textContent = '';
+      } catch (err) {
+        picked = null;
+        preview.hidden = true;
+        message.textContent = err.message;
+      }
     });
-    openDialog('🎉 You cooked it!', [
-      h('p', null, 'This saves the recipe to My Recipes as Cooked.'),
+    const saveBtn = h('button', {
+      type: 'button', class: 'btn sm',
+      onclick: () => {
+        if (!picked) { message.textContent = 'Pick or take a photo first, or choose “Save without photo”.'; return; }
+        finish(picked, 'Saved with your photo');
+      },
+    }, 'Save');
+
+    openDialog(hasPhoto ? '📷 Change photo' : '🎉 You cooked it!', [
+      h('p', null, 'Add a photo of your finished dish. It saves this recipe to My Recipes as Cooked, with your photo.'),
+      input, preview, message,
       h('div', { class: 'row' },
-        h('button', { type: 'button', class: 'btn sm', onclick: doneWithout }, 'Save'),
+        saveBtn,
+        hasPhoto ? null : h('button', { type: 'button', class: 'btn ghost sm', onclick: () => finish(null, 'Marked as cooked and saved') }, 'Save without photo'),
         h('button', { type: 'button', class: 'btn ghost sm', onclick: closeDialog }, 'Cancel')),
     ]);
   }

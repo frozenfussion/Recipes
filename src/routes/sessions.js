@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { buildRefineRequest, buildRecipeRequest, buildSystemPrompt } from '../ai/prompts.js';
+import { buildRecipeContent, buildRefineRequest, buildSystemPrompt } from '../ai/prompts.js';
 import { transaction } from '../db.js';
 import {
   chatHistory, claudeSettings, generateValidRecipe, parseChatMessage, parseCookInput, parseRefine, requestSummary,
 } from '../lib/chef.js';
 import { ApiError, friendlyAiError } from '../lib/errors.js';
+import { decodeImage, decodePhotos, deleteImageFiles, saveImage } from '../lib/images.js';
 import {
   addMessage, createSession, deleteSession, duplicateSession, getSession, listSessions, setRecipe, updateSession,
 } from '../lib/sessions.js';
@@ -22,23 +23,26 @@ export function sessionsRouter(db, { ai, imagesDir }) {
     res.json({ sessions: listSessions(db, { status, list, q: typeof q === 'string' ? q.trim() : undefined }) });
   });
 
-  // Start a session: asks Claude for the first recipe from diet choices, ingredients and free text.
+  // Start a session: asks Claude for the first recipe from diet choices, ingredients, free text
+  // and up to four fridge photos. The photos are checked, sent to Claude once, and kept as our own copy.
   router.post('/sessions', async (req, res) => {
     const input = parseCookInput(req.body);
-    if (!input.ingredients.length && !input.want) {
-      throw new ApiError(400, 'nothing_to_cook', 'Add an ingredient, or tell me what you fancy, first.');
+    const photos = decodePhotos(input.photos);
+    if (!input.ingredients.length && !input.want && !photos.length) {
+      throw new ApiError(400, 'nothing_to_cook', 'Add an ingredient, a photo, or tell me what you fancy, first.');
     }
     const { apiKey, model } = await claudeSettings(db, ai);
-    const messages = [{ role: 'user', content: buildRecipeRequest({ ingredients: input.ingredients, want: input.want }) }];
+    const messages = [{ role: 'user', content: buildRecipeContent({ ingredients: input.ingredients, want: input.want, photos }) }];
     const { recipe, text } = await generateValidRecipe(ai, { apiKey, model, prefs: input.prefs, messages });
     const id = createSession(db, {
       prefs: input.prefs,
       recipe,
       messages: [
-        { role: 'user', content: requestSummary({ ingredients: input.ingredients, want: input.want, photoCount: 0 }) },
+        { role: 'user', content: requestSummary({ ingredients: input.ingredients, want: input.want, photoCount: photos.length }) },
         { role: 'assistant', content: text || GREETING },
       ],
     });
+    for (const photo of photos) saveImage(db, imagesDir, id, 'fridge', photo.buffer, photo.mime);
     res.status(201).json(getSession(db, id));
   });
 
@@ -56,6 +60,24 @@ export function sessionsRouter(db, { ai, imagesDir }) {
   router.delete('/sessions/:id', async (req, res) => {
     await deleteSession(db, imagesDir, parseId(req.params.id));
     res.json({ ok: true });
+  });
+
+  // "I cooked it!": mark the session Cooked (which also saves it) and keep the user's own photo, if any.
+  // The photo is checked first, so a bad photo changes nothing. A new photo replaces the old one.
+  router.post('/sessions/:id/cooked', async (req, res) => {
+    const id = parseId(req.params.id);
+    getSession(db, id);
+    const photo = (req.body || {}).photo;
+    const decoded = photo === undefined || photo === null ? null : decodeImage(photo);
+    let replaced = [];
+    if (decoded) {
+      replaced = db.prepare("SELECT id, file FROM images WHERE session_id = ? AND kind = 'cooked'").all(id);
+      saveImage(db, imagesDir, id, 'cooked', decoded.buffer, decoded.mime);
+      for (const old of replaced) db.prepare('DELETE FROM images WHERE id = ?').run(old.id);
+    }
+    const session = updateSession(db, id, { status: 'cooked' });
+    await deleteImageFiles(imagesDir, replaced.map((r) => r.file));
+    res.json(session);
   });
 
   router.post('/sessions/:id/duplicate', (req, res) => {

@@ -72,12 +72,14 @@ export function fakeAi(overrides = {}) {
       // Default recipe: the sample one. A refine request changes the title and adds a step.
       async generateRecipe(args) {
         calls.anthropic.push(['generateRecipe', args]);
-        const request = args.messages[0].content;
+        const first = args.messages[0].content;
+        const request = typeof first === 'string' ? first : first.filter((b) => b.type === 'text').map((b) => b.text).join('\n');
+        const hasPhotos = typeof first !== 'string' && first.some((b) => b.type === 'image');
         const refine = request.match(/Please change it like this: (.*)\n/);
         return {
           recipe: refine
             ? sampleRecipe({ title: 'Garlicky Chicken & Spinach Rice (refined)', steps: [...sampleRecipe().steps, `Refined: ${refine[1]}`] })
-            : sampleRecipe(),
+            : sampleRecipe(hasPhotos ? { detected_ingredients: ['eggs', 'milk'] } : {}),
           text: refine ? 'I made it a bit different.' : 'Here you go!',
         };
       },

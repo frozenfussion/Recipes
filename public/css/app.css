@@ -119,6 +119,7 @@ details.more summary { cursor: pointer; font-weight: 800; color: var(--primary);
 .btn[disabled] { opacity: 0.6; cursor: progress; }
 
 /* ---------- Drop area, photos ---------- */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .drop { border: 3px dashed var(--line); border-radius: var(--radius); padding: 18px; text-align: center; background: var(--bg); }
 .drop .btn { margin-top: 8px; }
 .thumbs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
