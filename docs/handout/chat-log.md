@@ -119,3 +119,10 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - It also named the weakest parts: startup code is untested; migrations were not wrapped in a transaction (a failing step could leave half-made tables); an old Node would crash with a cryptic error; PowerShell script policy and OneDrive-synced folders can break student setups.
 - It proposed 7 small fixes (about 30 lines): handle the listen error, safer "run directly" check, safer `.env` reading, transactional migrations and a "database is newer than the code" guard, a clear Node version check, startup tests, and README notes.
 - Lessons for students: (1) always ask the AI to explain and then to attack its own work; (2) a "done" report is not proof, so ask what is untested; (3) the best fixes are small, tested, and explained.
+
+## Session 1 – Phase 0 fixes done (screenshot 10)
+- `10-claude-code-phase0-fixes-report.png`: all 7 follow-up changes in one commit (`7e8b29f`), rebased onto the remote and pushed. 22 of 22 tests pass (up from 6).
+- Node versions tried without installing anything extra, using `npx node@22`: 22.18.0, 22.23.3 and 24.19.0 pass; 22.17.0 is refused with a plain message. **Minimum is now Node 22.18** (needed for `import.meta.main`). Teaching point: the AI tested the claim instead of trusting memory, and the docs, README and specs were updated to match.
+- New: `scripts/check-node.js`, `.gitattributes` (`* text=auto eol=lf`), README troubleshooting section (busy port, old Node, PowerShell script policy, OneDrive, Notepad BOM).
+- Still unchecked by Claude Code: `npm run dev` and a real browser. Aziz checks these himself.
+- Open issue it flagged itself: startup tests use the real `data/chefbuddy.db`. Fix before Phase 2, when API keys will live in that database: tests must use a temporary folder.
