@@ -1,11 +1,13 @@
 import { Router } from 'express';
-import { buildRecipeContent, buildRefineRequest, buildSystemPrompt } from '../ai/prompts.js';
+import { buildImagePrompt, buildRecipeContent, buildRefineRequest, buildSystemPrompt } from '../ai/prompts.js';
 import { transaction } from '../db.js';
 import {
   chatHistory, claudeSettings, generateValidRecipe, parseChatMessage, parseCookInput, parseRefine, requestSummary,
 } from '../lib/chef.js';
 import { ApiError, friendlyAiError } from '../lib/errors.js';
-import { decodeImage, decodePhotos, deleteImageFiles, saveImage } from '../lib/images.js';
+import { decodeImage, decodePhotos, deleteImageFiles, detectImageType, saveImage } from '../lib/images.js';
+import { resolveModel } from '../lib/models.js';
+import { getSetting } from '../lib/settings.js';
 import {
   addMessage, createSession, deleteSession, duplicateSession, getSession, listSessions, setRecipe, updateSession,
 } from '../lib/sessions.js';
@@ -78,6 +80,33 @@ export function sessionsRouter(db, { ai, imagesDir }) {
     const session = updateSession(db, id, { status: 'cooked' });
     await deleteImageFiles(imagesDir, replaced.map((r) => r.file));
     res.json(session);
+  });
+
+  // The AI dish photo. Only ever runs because the user pressed the button (it costs money):
+  // one picture per press, at the quality chosen in Settings (low unless changed).
+  router.post('/sessions/:id/ai-photo', async (req, res) => {
+    const id = parseId(req.params.id);
+    const session = getSession(db, id);
+    if (!session.recipe) throw new ApiError(400, 'no_recipe', 'This session has no recipe to make a picture of yet.');
+    const apiKey = getSetting(db, 'openai_api_key');
+    if (!apiKey) throw new ApiError(400, 'no_key', 'No OpenAI API key yet. Add one in Settings.');
+    const model = await resolveModel(db, ai, 'openai');
+    const quality = getSetting(db, 'image_quality') || 'low';
+
+    let image;
+    try {
+      image = await ai.openai.generateImage({ apiKey, model, quality, prompt: buildImagePrompt(session.recipe) });
+    } catch (err) {
+      throw friendlyAiError(err, 'OpenAI');
+    }
+    const mime = detectImageType(image.buffer);
+    if (!mime) throw new ApiError(502, 'no_image', 'The image service sent something that is not a picture. Try again.');
+
+    const older = db.prepare("SELECT id, file FROM images WHERE session_id = ? AND kind = 'ai'").all(id);
+    saveImage(db, imagesDir, id, 'ai', image.buffer, mime);
+    for (const old of older) db.prepare('DELETE FROM images WHERE id = ?').run(old.id); // keep only the newest
+    await deleteImageFiles(imagesDir, older.map((o) => o.file));
+    res.json(getSession(db, id));
   });
 
   router.post('/sessions/:id/duplicate', (req, res) => {

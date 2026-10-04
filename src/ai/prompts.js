@@ -81,6 +81,17 @@ export function buildRefineRequest(recipe, { chips = [], text = '' }) {
   return `Here is the current recipe:\n${recipeToText(recipe)}\n\nPlease change it like this: ${wanted}\nSubmit the full updated recipe with the submit_recipe tool, and add one short sentence saying what you changed.`;
 }
 
+// The prompt for the optional AI dish photo. Built here, never typed by the user.
+// "Main ingredients" are the first few ingredients with the amounts removed ("400 g chicken" -> "chicken").
+const AMOUNT = /^[\d\s½¼¾⅓⅔./-]*(?:kg|g|ml|l|cups?|tbsp|tsp|oz|lb|cloves?|pinch|cans?|tins?|slices?|large|small|medium)?\b\s*(?:of\s+)?/i;
+export function buildImagePrompt(recipe) {
+  const main = recipe.ingredients.slice(0, 4)
+    .map((item) => item.replace(AMOUNT, '').replace(/[,(].*$/, '').trim())
+    .filter(Boolean);
+  const withIngredients = main.length ? `, made with ${main.join(', ')}` : '';
+  return `A natural, appetising photo of ${recipe.title}${withIngredients}, home-cooked, served on a plate, soft daylight, no text, no people.`;
+}
+
 // Claude is made to answer through this tool so we get clean JSON, not prose to parse.
 export const SUBMIT_RECIPE_TOOL = {
   name: 'submit_recipe',

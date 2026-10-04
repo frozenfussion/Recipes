@@ -100,6 +100,11 @@ export function fakeAi(overrides = {}) {
         ];
       },
       async checkKey(key) { calls.openai.push(['checkKey', key]); },
+      // A tiny valid PNG, so the picture can be stored and served like a real one.
+      async generateImage(args) {
+        calls.openai.push(['generateImage', args]);
+        return { buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64') };
+      },
     },
   };
   return Object.assign(ai, overrides);

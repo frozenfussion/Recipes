@@ -7,6 +7,10 @@ import { resizeImage } from '../image.js';
 import { show } from '../router.js';
 import { resetCook, state } from '../state.js';
 
+const AI_HINT_KEY = 'cb-ai-photo-hint-seen';
+const localGet = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+const localSet = (key, value) => { try { localStorage.setItem(key, value); } catch { /* storage blocked: we will just ask again */ } };
+
 const BACK_LABELS = { home: '← Back to ingredients', history: '← History', saved: '← My Recipes' };
 const lines = (text) => text.split('\n').map((l) => l.trim()).filter(Boolean);
 
@@ -59,16 +63,25 @@ function paint(root, session, isCurrent) {
     if (session.photo) {
       const mine = session.photo.kind === 'cooked';
       return h('div', { class: 'photo has' },
-        h('img', { src: `/images/${session.photo.id}`, alt: `Photo of ${session.title}` }),
+        h('img', {
+          src: `/images/${session.photo.id}`,
+          alt: mine ? `Your photo of ${session.title}` : `AI-generated picture of what ${session.title} might look like`,
+        }),
         h('div', { class: 'over' },
           h('span', { class: 'badge' }, mine ? '📷 My photo' : 'AI-generated · what it might look like'),
-          h('button', { type: 'button', class: 'btn alt sm', onclick: cookedDialog }, 'Change photo')));
+          h('span', { class: 'row' },
+            mine ? null : aiButton('🎨 Try again'),
+            h('button', { type: 'button', class: 'btn alt sm', onclick: cookedDialog }, 'Change photo'))));
     }
     return h('div', { class: 'photo' },
       h('span', { class: 'badge' }, 'AI-generated · what it might look like'),
-      h('span', { class: 'row' },
-        h('button', { type: 'button', class: 'btn alt sm', onclick: () => toast('AI photos arrive in Phase 6') }, '🎨 AI photo'),
-        h('button', { type: 'button', class: 'btn sm', onclick: cookedDialog }, '📷 My photo')));
+      h('span', { class: 'row' }, aiButton('🎨 AI photo'), h('button', { type: 'button', class: 'btn sm', onclick: cookedDialog }, '📷 My photo')));
+  }
+
+  function aiButton(label) {
+    const button = h('button', { type: 'button', class: 'btn alt sm' }, label);
+    button.addEventListener('click', () => makeAiPhoto(button, label));
+    return button;
   }
 
   function recipeCard() {
@@ -266,6 +279,30 @@ function paint(root, session, isCurrent) {
       toast('Recipe deleted');
       await show(state.backTo === 'home' ? 'history' : state.backTo);
     });
+  }
+
+  // The AI photo costs a little of the user's OpenAI credit, so it only ever runs on a button press,
+  // and the first time we say so. One picture per press.
+  async function makeAiPhoto(button, label) {
+    if (!localGet(AI_HINT_KEY)) {
+      const ok = await confirmBox({
+        title: 'Make an AI photo?',
+        message: 'This uses a little of your OpenAI credit. The picture shows what the dish might look like. It is not a photo of your cooking.',
+        okLabel: 'Make the photo',
+      });
+      if (!ok) return;
+      localSet(AI_HINT_KEY, '1');
+    }
+    button.disabled = true;
+    setChildren(button, spinner(), ' Painting…');
+    try {
+      repaint(await api('POST', `/sessions/${session.id}/ai-photo`));
+      toast('AI photo ready');
+    } catch (err) {
+      toast(err.message, { error: true });
+      button.disabled = false;
+      setChildren(button, label);
+    }
   }
 
   // "I cooked it!" and "My photo" / "Change photo". The photo is shrunk in the browser first.
