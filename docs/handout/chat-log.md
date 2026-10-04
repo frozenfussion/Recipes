@@ -111,3 +111,11 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - **Honest "what I did not check" list** (teaching point: a good assistant tells you what it did not test): ran `node` directly, not `npm start` or `npm run dev`; did not open a real browser; did not test `HOST=0.0.0.0`; README not updated.
 - Git printed harmless LF/CRLF line-ending warnings; a `.gitattributes` file would silence them.
 - Aziz's review steps for the handout: reopen terminal, `node -v`; `npm start` and open http://localhost:3000 and /api/health; `npm test`; `npm run dev` and edit a file to see the restart; ask Claude Code to explain and to challenge its own work; `git pull --rebase` then `git push`.
+
+## Session 1 – Claude Code reviews its own Phase 0 (recursive refinement in action)
+- Aziz asked Claude Code to explain `server.js` and `db.js` and to challenge its own work. It found **two real bugs** by testing, not by guessing:
+  1. **False success message:** starting a second copy while port 3000 was busy printed "Chef Buddy is running" and exited with code 0. Cause: the `listen` callback ignored the startup error.
+  2. **Invisible BOM in `.env`:** some Windows tools save a hidden marker at the start of the file, so `PORT` was read as `"﻿PORT"` and the default silently won.
+- It also named the weakest parts: startup code is untested; migrations were not wrapped in a transaction (a failing step could leave half-made tables); an old Node would crash with a cryptic error; PowerShell script policy and OneDrive-synced folders can break student setups.
+- It proposed 7 small fixes (about 30 lines): handle the listen error, safer "run directly" check, safer `.env` reading, transactional migrations and a "database is newer than the code" guard, a clear Node version check, startup tests, and README notes.
+- Lessons for students: (1) always ask the AI to explain and then to attack its own work; (2) a "done" report is not proof, so ask what is untested; (3) the best fixes are small, tested, and explained.
