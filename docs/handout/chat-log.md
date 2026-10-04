@@ -155,3 +155,8 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - **Real cause: Aziz had not clicked "Save key".** Typing a key is not enough; the key must be saved first. Claude Code then offered a small UX fix: when a key is typed but not saved, Refresh and Test should say "Press Save key first".
 - Lessons: (1) many "bugs" are a missed step, so check the simple thing first; (2) report symptoms to the AI in plain words and let it investigate; (3) the investigation still left the app better (timeouts, clear messages, a network checker).
 - Placeholder note: the striped yellow/black box on a recipe is the "no photo yet" placeholder. Press **AI photo** (needs a saved OpenAI key and image model) or **My photo**.
+
+## Session 1 – AI photo works (screenshots 16, 17)
+- `16-ai-photo-generated.png`: the OpenAI image on the recipe, labelled "AI-generated · what it might look like", with **Try again** and **Change photo** buttons.
+- `17-recipe-actions-and-chat.png`: the lower half of the recipe screen: method, a cooking tip, the "Check labels and allergens yourself" note, buttons (I cooked it!, Add to list, Edit, Delete) and the chat ("Ask Chef Buddy") with the user's message and Claude's reply.
+- Aziz: "looks absolutely beautiful." The full journey now works with real keys: diet and ingredients, recipe, chat, AI photo.
