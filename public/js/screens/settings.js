@@ -81,11 +81,24 @@ function fillCard(host, cfg, settings) {
   });
   const keyStatus = h('span', { class: 'status' }, info.hasKey ? 'Key saved' : 'No key yet');
 
+  // Test and Refresh work with the SAVED key. A key that is typed but not saved yet, or no key at all,
+  // gets a clear instruction instead of a spinner that has nothing to wait for.
+  const mustSaveFirst = () => {
+    if (keyInput.value.trim()) { toast('Press Save key first'); return true; }
+    if (!info.hasKey) { toast(`Add your ${cfg.vendor} key and press Save key first`); return true; }
+    return false;
+  };
+  const savedStatus = keyStatus.textContent;
+  keyInput.addEventListener('input', () => {
+    keyStatus.textContent = keyInput.value.trim() ? 'Not saved yet' : savedStatus;
+  });
+
   const testBtn = h('button', { type: 'button', class: 'btn alt sm' }, 'Test');
   testBtn.addEventListener('click', async () => {
+    if (mustSaveFirst()) return;
     testBtn.disabled = true;
     try {
-      await api('POST', cfg.testPath, keyInput.value.trim() ? { apiKey: keyInput.value.trim() } : {}, { timeout: 25_000 });
+      await api('POST', cfg.testPath, {}, { timeout: 25_000 });
       keyStatus.textContent = 'Key OK';
       toast(`${cfg.vendor} key works`);
     } catch (err) {
@@ -134,7 +147,7 @@ function fillCard(host, cfg, settings) {
 
   // Model picker
   const select = h('select', { class: 'field', id: `model-${cfg.modelField}`, 'aria-label': cfg.modelLabel, disabled: true });
-  const refreshBtn = h('button', { type: 'button', class: 'btn ghost sm', disabled: !info.hasKey }, '↻ Refresh');
+  const refreshBtn = h('button', { type: 'button', class: 'btn ghost sm' }, '↻ Refresh');
   const listNote = h('p', { class: 'small' }, info.hasKey ? 'Loading the live model list…' : `Add your ${cfg.vendor} key above to load the model list.`);
   const warning = h('div', { class: 'warn', hidden: true, role: 'alert' });
   const manualInput = h('input', { class: 'field', placeholder: 'e.g. a model id from the vendor docs', 'aria-label': 'Model id', maxlength: '200' });
@@ -188,7 +201,7 @@ function fillCard(host, cfg, settings) {
   }
 
   select.addEventListener('change', () => saveModel(select.value));
-  refreshBtn.addEventListener('click', () => loadList(true));
+  refreshBtn.addEventListener('click', () => { if (!mustSaveFirst()) loadList(true); });
   manualBtn.addEventListener('click', () => {
     const id = manualInput.value.trim();
     if (id) saveModel(id).then(() => { manualInput.value = ''; });
