@@ -1,6 +1,8 @@
+import { api } from './api.js';
+
 // Theme: 'light', 'dark' or 'device' (no data-theme attribute, the CSS follows the device).
-// The database is the source of truth (see settings.js), localStorage is a mirror so
-// theme-init.js can apply it before the first paint.
+// The database is the source of truth, localStorage is a mirror so theme-init.js can
+// apply it before the first paint (no flash).
 const KEY = 'cb-theme';
 
 export function getTheme() {
@@ -20,8 +22,24 @@ export function applyTheme(theme) {
   }
 }
 
+// Apply now and remember it in the database. A failed save is not worth interrupting the user.
+export function saveTheme(theme) {
+  applyTheme(theme);
+  return api('PUT', '/settings', { theme }).catch(() => {});
+}
+
 export function isDarkNow() {
   const theme = getTheme();
   if (theme !== 'device') return theme === 'dark';
-  return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+  return Boolean(window.matchMedia) && matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+// On start-up, trust the database if it disagrees with this browser.
+export async function syncThemeFromServer() {
+  try {
+    const settings = await api('GET', '/settings');
+    if (settings.theme !== getTheme()) applyTheme(settings.theme);
+  } catch {
+    // Server not reachable yet: keep whatever the browser has.
+  }
 }

@@ -1,23 +1,37 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createAi } from './ai/index.js';
 import { ConfigError, loadConfig } from './config.js';
 import { openDb } from './db.js';
 import { ApiError, sendError } from './lib/errors.js';
 import { healthRouter } from './routes/health.js';
+import { modelsRouter } from './routes/models.js';
+import { settingsRouter } from './routes/settings.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-// Building the app in a function lets tests use an in-memory database.
-export function createApp(db) {
+// Photos travel as base64 inside JSON, so those routes get a bigger limit than the rest.
+const smallJson = express.json({ limit: '1mb' });
+const photoJson = express.json({ limit: '25mb' });
+const isPhotoRoute = (req) =>
+  req.method === 'POST' && (req.path === '/sessions' || /^\/sessions\/\d+\/cooked$/.test(req.path));
+
+// Building the app in a function lets tests use an in-memory database and fake AI services.
+export function createApp(db, { ai = createAi() } = {}) {
   const app = express();
   app.disable('x-powered-by');
 
+  app.use('/api', (req, res, next) => (isPhotoRoute(req) ? photoJson : smallJson)(req, res, next));
   app.use('/api', healthRouter(db));
+  app.use('/api', settingsRouter(db, ai));
+  app.use('/api', modelsRouter(db, ai));
   app.use('/api', (req, res) => sendError(res, 404, 'not_found', 'That API address does not exist.'));
   app.use('/api', (err, req, res, next) => {
     if (err instanceof ApiError) return sendError(res, err.status, err.code, err.message);
-    console.error(err.message); // message only, never the whole request
+    if (err.type === 'entity.too.large') return sendError(res, 413, 'too_large', 'That upload is too big. Try a smaller photo.');
+    if (err.type === 'entity.parse.failed') return sendError(res, 400, 'bad_json', 'The request was not valid JSON.');
+    console.error(err.message); // message only, never the whole request (it may hold a key)
     sendError(res, 500, 'server_error', 'Something went wrong on the server.');
   });
 

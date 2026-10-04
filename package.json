@@ -13,6 +13,8 @@
     "test": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --test"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "@anthropic-ai/sdk": "^0.131.0",
+    "express": "^5.1.0",
+    "openai": "^7.27.0"
   }
 }

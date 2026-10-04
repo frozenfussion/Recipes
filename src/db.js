@@ -7,6 +7,8 @@ import path from 'node:path';
 export const MIGRATIONS = [
   // Version 1 is just the bookkeeping table. Real tables arrive in later phases.
   (db) => db.exec('SELECT 1'),
+  // Version 2: settings (API keys, chosen models, theme, cached model lists).
+  (db) => db.exec('CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)'),
 ];
 
 export function openDb(file, migrations = MIGRATIONS) {

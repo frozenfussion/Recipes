@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { openDb, schemaVersion } from '../src/db.js';
+import { MIGRATIONS, openDb, schemaVersion } from '../src/db.js';
 
 function withTempDbFile(fn) {
   const dir = mkdtempSync(path.join(tmpdir(), 'chefbuddy-'));
@@ -17,9 +17,9 @@ function withTempDbFile(fn) {
 const tableExists = (db, name) =>
   db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(name) !== undefined;
 
-test('a new database gets schema version 1', () => {
+test('a new database is brought up to the latest schema version', () => {
   const db = openDb(':memory:');
-  assert.equal(schemaVersion(db), 1);
+  assert.equal(schemaVersion(db), MIGRATIONS.length);
 });
 
 test('foreign keys are switched on', () => {
@@ -32,7 +32,7 @@ test('opening the same file twice does not repeat migrations', () => {
     openDb(file).close();
     const again = openDb(file);
     const rows = again.prepare('SELECT COUNT(*) AS n FROM schema_version').get();
-    assert.equal(rows.n, 1);
+    assert.equal(rows.n, MIGRATIONS.length);
     again.close();
   });
 });
