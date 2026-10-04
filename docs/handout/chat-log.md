@@ -37,3 +37,14 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
   - Recipe detail: **Edit** (name, list, ingredients, method), **Delete** (confirm dialog), **Cook it again**, **← My Recipes**.
 - Screenshots: `mockup-a-light-recipe-refine.png`, `mockup-a-light-saved-manage.png`, `mockup-a-light-recipe-detail.png`, `mockup-a-light-confirm-delete.png`.
 - Note: a mid-turn "two theme buttons" request was withdrawn by Aziz (he was looking at the wrong button) and reverted.
+
+## Session 1 – Mockup feedback round 2
+- Aziz asked for: a **history of all sessions/recipes**, an **"I cooked it" success flow with a photo of the finished dish** that saves it as a recipe, and the ability to **continue the chat**, **duplicate** and **update** a recipe.
+- Design decision: one model. Every session lives in **History** (even unsaved ones, shown as "Not saved"). Saved/cooked sessions also appear in **My Recipes**. Opening any of them shows the recipe plus its chat, so you can carry on.
+- Added to `mockups/index.html`:
+  - New **History** tab (filter All / Cooked / Saved / Not saved).
+  - **🎉 I cooked it!**: take or upload a photo (camera on a phone), saves the recipe as Cooked with your photo. Can skip the photo.
+  - **⧉ Duplicate**: makes a copy ("… (copy)") with its own fresh chat, ready to refine.
+  - Working chat box, Refine messages go into the chat, **New session** no longer loses unsaved work (it stays in History).
+  - Recipe view/edit/delete is now one screen shared by History and My Recipes.
+- Screenshots: `mockup-a-light-history.png`, `mockup-a-light-cooked-dialog.png`, `mockup-a-light-recipe-cooked-photo.png`, `mockup-a-light-duplicate.png`, `mockup-a-light-saved-with-photo.png`, `mockup-a-light-phone-history.png`.

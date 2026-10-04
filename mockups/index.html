@@ -129,6 +129,20 @@ ul.ing li::marker{color:var(--primary)} ol.steps li::marker{color:var(--primary)
 .mgmt{border:3px dashed var(--line);border-radius:var(--radius);padding:10px 12px;margin:10px 0}
 .mgmt strong{font-family:var(--font-head);letter-spacing:var(--head-spacing);font-size:1.15rem}
 
+
+.status-badge{display:inline-block;border:3px solid var(--line);border-radius:999px;padding:1px 10px;font-size:.78rem;font-weight:800;background:var(--bg)}
+.status-badge.cooked{background:var(--accent);color:var(--on-accent)}
+.status-badge.saved{background:var(--pop);color:#2b1a0f}
+.photo.has{background:var(--card);padding:0;overflow:hidden;position:relative}
+.photo.has img{width:100%;height:100%;object-fit:cover;display:block}
+.photo.has .over{position:absolute;left:10px;right:10px;bottom:10px;display:flex;justify-content:space-between;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;display:block}
+.thumb{overflow:hidden}
+.preview{max-width:100%;max-height:240px;border:4px solid var(--line);border-radius:var(--radius);display:block;margin:10px auto}
+.rcard .go{margin-left:auto;font-weight:800;color:var(--primary);white-space:nowrap}
+nav.tabs button{padding:6px 3px;font-size:.72rem;white-space:nowrap;min-width:0}
+.chat .note{align-self:center;font-size:.8rem;color:var(--muted);text-align:center}
+
 /* screens + nav */
 .screen{display:none}.screen.on{display:block}
 nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:4px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px;z-index:5}
@@ -209,58 +223,19 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
         <div class="drop" style="margin-top:12px">📷 <b>Snap or upload a photo</b><br><span class="small">Chef Buddy will spot the ingredients for you</span></div>
         <label class="lbl" for="want">…or tell me what you fancy</label>
         <textarea id="want" placeholder="e.g. I want to make chicken biryani. What do I need to buy?"></textarea>
-        <div style="margin-top:14px"><button class="btn big" data-go="recipe">🍳 Cook something up!</button></div>
+        <div style="margin-top:14px"><button class="btn big" data-act="cook">🍳 Cook something up!</button></div>
       </div>
     </div>
   </section>
 
-  <!-- ===== RECIPE + CHAT ===== -->
-  <section class="screen" id="s-recipe">
-    <div class="bar">
-      <button class="btn ghost sm" data-go="home">← Back to ingredients</button>
-      <button class="btn alt sm" data-act="toggle-refine" id="refineBtn">✏️ Refine</button>
-      <span class="grow"></span>
-      <button class="btn ghost sm" data-act="new-session">＋ New session</button>
-    </div>
-    <div class="card" id="refinePanel" hidden>
-      <h3>Refine this recipe</h3>
-      <div class="chips" data-chips style="margin:8px 0">
-        <span class="chip" role="button" aria-pressed="false">Spicier</span><span class="chip" role="button" aria-pressed="false">Quicker</span>
-        <span class="chip" role="button" aria-pressed="false">Fewer ingredients</span><span class="chip" role="button" aria-pressed="false">Lighter</span>
-        <span class="chip" role="button" aria-pressed="false">Kid-friendly</span><span class="chip" role="button" aria-pressed="false">One-pan</span>
-        <span class="chip" role="button" aria-pressed="false">Double the servings</span>
-      </div>
-      <textarea id="refineText" placeholder="Or say it in your own words, e.g. swap the chicken for chickpeas…"></textarea>
-      <div class="row" style="margin-top:10px"><button class="btn sm" data-act="apply-refine">Update recipe</button><button class="btn ghost sm" data-act="toggle-refine">Cancel</button></div>
-    </div>
-    <div class="grid two">
-      <div class="card">
-        <div class="photo"><span class="badge">AI-generated · what it might look like</span><button class="btn alt" style="font-size:1rem;padding:6px 14px">🎨 New photo</button></div>
-        <h2 style="margin-top:14px">Garlicky Chicken &amp; Spinach Rice</h2>
-        <div class="meta"><span class="badge">⏱ 35 min</span><span class="badge">🍽 2 servings</span><span class="badge">Halal</span><span class="badge">Nut-free</span></div>
-        <h3>You'll need</h3>
-        <ul class="ing"><li>400 g chicken thighs</li><li>1 cup basmati rice</li><li>150 g spinach</li><li>½ cup yoghurt</li><li>3 cloves garlic</li></ul>
-        <h3>Method</h3>
-        <ol class="steps"><li>Marinate the chicken in yoghurt and garlic for 10 minutes.</li><li>Sear the chicken until golden, about 5 minutes per side.</li><li>Add rice and 2 cups water, cover and simmer 12 minutes.</li><li>Fold in the spinach and rest for 5 minutes.</li></ol>
-        <div class="row" style="margin-top:12px"><button class="btn" data-act="save-current" id="saveBtn">💾 Save recipe</button><button class="btn ghost" data-act="add-to-list">📋 Add to list</button></div>
-      </div>
-      <div class="card">
-        <h2>Ask Chef Buddy</h2>
-        <div class="chat" id="chatBox">
-          <div class="msg ai">Here's a recipe from what's in your fridge! Shout if you hit a snag. 👨‍🍳</div>
-          <div class="msg me">The shop only had Greek yoghurt. Is that OK?</div>
-          <div class="msg ai">Perfect, even better. It's thicker, so loosen it with a splash of water.</div>
-          <div class="msg me">The rice is sticking to the pan!</div>
-          <div class="msg ai">Lower the heat and add a splash of hot water. Don't stir; just cover and wait.</div>
-        </div>
-        <div class="sendrow"><input class="field" placeholder="Ask a question…"><button class="btn">Send</button></div>
-      </div>
-    </div>
-  </section>
+  <!-- ===== RECIPE + CHAT (rendered from the current session) ===== -->
+  <section class="screen" id="s-recipe"><div id="recipeRoot"></div></section>
+
+  <!-- ===== HISTORY ===== -->
+  <section class="screen" id="s-history"><div id="historyRoot"></div></section>
 
   <!-- ===== MY RECIPES ===== -->
   <section class="screen" id="s-saved"><div id="savedRoot"></div></section>
-  <section class="screen" id="s-detail"><div id="detailRoot"></div></section>
 
   <!-- ===== SETTINGS ===== -->
   <section class="screen" id="s-settings">
@@ -298,6 +273,7 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
 <nav class="tabs" aria-label="Main">
   <button data-screen="home" aria-current="page"><span class="ic">🧑‍🍳</span>Cook</button>
   <button data-screen="recipe"><span class="ic">📖</span>Recipe</button>
+  <button data-screen="history"><span class="ic">🕘</span>History</button>
   <button data-screen="saved"><span class="ic">⭐</span>My Recipes</button>
   <button data-screen="settings"><span class="ic">⚙️</span>Settings</button>
 </nav>
@@ -311,17 +287,17 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
   function setTheme(t){root.dataset.theme=t;store('mock-theme',t);
     document.querySelectorAll('[data-set-theme]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.setTheme===t)})}
   function show(s){
-    if(s==='detail'&&!window.__open)s='saved';
+    if(s==='recipe'&&!cur()){s='home';toast('Start a session first')}
     document.querySelectorAll('.screen').forEach(function(e){e.classList.toggle('on',e.id==='s-'+s)});
     document.querySelectorAll('nav.tabs button').forEach(function(b){
-      if(b.dataset.screen===(s==='detail'?'saved':s))b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+      if(b.dataset.screen===s)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
     if(location.hash!=='#'+s)history.replaceState(null,'','#'+s);
+    render(s);
   }
   var q=new URLSearchParams(location.search);
   var prefersDark=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;
   setDir(q.get('dir')||store('mock-dir')||'a');
   setTheme(q.get('theme')||store('mock-theme')||(prefersDark?'dark':'light'));
-  show((location.hash||'#home').slice(1));
   document.addEventListener('click',function(e){
     var t=e.target.closest('button,.chip');if(!t)return;
     if(t.dataset.setDir)setDir(t.dataset.setDir);
@@ -335,32 +311,104 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
     }
   });
 
-  /* ===== demo data & app behaviour (mockup only, nothing is stored) ===== */
-  var lists=[{id:'week',name:'Weeknight'},{id:'fam',name:'Family favourites'}];
-  var recipes=[
-    {id:1,title:'Chicken Biryani',emoji:'🍛',tags:['Halal'],time:60,list:'week',ing:['500 g chicken','2 cups basmati rice','2 onions','1 cup yoghurt','Biryani spice mix'],steps:['Marinate the chicken in yoghurt and spices.','Fry the onions until deep golden.','Layer chicken and par-boiled rice.','Cover tightly and cook on low for 25 minutes.']},
-    {id:2,title:'Chickpea Salad Bowl',emoji:'🥗',tags:['Vegan'],time:15,list:'fam',ing:['1 can chickpeas','1 cucumber','2 tomatoes','Lemon','Olive oil'],steps:['Drain and rinse the chickpeas.','Chop the vegetables.','Toss everything with lemon and olive oil.']},
-    {id:3,title:'Garlic Prawn Linguine',emoji:'🍝',tags:['Pescatarian'],time:25,list:'',ing:['250 g linguine','300 g prawns','4 cloves garlic','Parsley','Chilli flakes'],steps:['Boil the linguine.','Sizzle garlic and chilli in oil, add prawns.','Toss pasta through with a splash of pasta water.']},
-    {id:4,title:'Spinach & Chicken Rice',emoji:'🥘',tags:['Halal'],time:35,list:'week',ing:['400 g chicken thighs','1 cup basmati rice','150 g spinach','½ cup yoghurt','3 cloves garlic'],steps:['Marinate the chicken.','Sear until golden.','Add rice and water, simmer 12 minutes.','Fold in the spinach and rest.']}
-  ];
-  var nextId=10, activeList='all', openId=null, editing=false, renaming=false, adding=false, query='';
+
+  /* ===== demo data & behaviour (mockup only: nothing is stored, a refresh resets it) ===== */
   var $=function(id){return document.getElementById(id)};
   function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  var lists=[{id:'week',name:'Weeknight'},{id:'fam',name:'Family favourites'}];
+  var nextId=100;
+  var sessions=[
+    {id:6,title:'Lentil & Carrot Soup',emoji:'🍲',tags:['Vegan'],time:40,date:'Tue 29 Sep',status:'draft',list:'',photo:null,
+     ing:['1 cup red lentils','2 carrots','1 onion','Cumin','Vegetable stock'],steps:['Soften the onion and carrots.','Add lentils, cumin and stock.','Simmer 25 minutes and blend.'],
+     chat:[{r:'ai',t:'Here is a simple soup from your pantry.'},{r:'me',t:'Can I use a stock cube?'},{r:'ai',t:'Yes, one cube in 1 litre of hot water works well.'}]},
+    {id:3,title:'Garlic Prawn Linguine',emoji:'🍝',tags:['Pescatarian'],time:25,date:'Thu 1 Oct',status:'saved',list:'',photo:null,
+     ing:['250 g linguine','300 g prawns','4 cloves garlic','Parsley','Chilli flakes'],steps:['Boil the linguine.','Sizzle garlic and chilli in oil, add prawns.','Toss pasta through with a splash of pasta water.'],
+     chat:[{r:'ai',t:'Quick and garlicky, ready in 25 minutes.'}]},
+    {id:2,title:'Chickpea Salad Bowl',emoji:'🥗',tags:['Vegan'],time:15,date:'Fri 2 Oct',status:'saved',list:'fam',photo:null,
+     ing:['1 can chickpeas','1 cucumber','2 tomatoes','Lemon','Olive oil'],steps:['Drain and rinse the chickpeas.','Chop the vegetables.','Toss everything with lemon and olive oil.'],
+     chat:[{r:'ai',t:'A fresh, filling lunch bowl.'}]},
+    {id:1,title:'Chicken Biryani',emoji:'🍛',tags:['Halal'],time:60,date:'Sat 3 Oct',status:'cooked',list:'week',photo:null,
+     ing:['500 g chicken','2 cups basmati rice','2 onions','1 cup yoghurt','Biryani spice mix'],steps:['Marinate the chicken in yoghurt and spices.','Fry the onions until deep golden.','Layer chicken and par-boiled rice.','Cover tightly and cook on low for 25 minutes.'],
+     chat:[{r:'ai',t:'Biryani it is! Start the marinade early.'},{r:'me',t:'The rice is sticking to the pan!'},{r:'ai',t:'Lower the heat and add a splash of hot water. Do not stir; just cover and wait.'},{r:'me',t:'It worked, it is perfect!'}]},
+    {id:5,title:'Garlicky Chicken & Spinach Rice',emoji:'🍗',tags:['Halal','Nut-free'],time:35,date:'Today',status:'draft',list:'',photo:null,
+     ing:['400 g chicken thighs','1 cup basmati rice','150 g spinach','½ cup yoghurt','3 cloves garlic'],steps:['Marinate the chicken in yoghurt and garlic for 10 minutes.','Sear the chicken until golden, about 5 minutes per side.','Add rice and 2 cups water, cover and simmer 12 minutes.','Fold in the spinach and rest for 5 minutes.'],
+     chat:[{r:'ai',t:"Here's a recipe from what's in your fridge! Shout if you hit a snag. 👨‍🍳"},{r:'me',t:'The shop only had Greek yoghurt. Is that OK?'},{r:'ai',t:"Perfect, even better. It's thicker, so loosen it with a splash of water."}]}
+  ];
+  var currentId=5, backTo='home', editing=false, histFilter='all', activeList='all', query='', renaming=false, adding=false;
+  function cur(){return sessions.filter(function(x){return x.id===currentId})[0]||null}
+  function byId(id){return sessions.filter(function(x){return x.id===id})[0]}
   function listName(id){var l=lists.filter(function(x){return x.id===id})[0];return l?l.name:'Not in a list'}
-  function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){t.hidden=true},2200)}
-  function dialog(html,onReady){$('dialog').innerHTML=html;$('scrim').hidden=false;if(onReady)onReady($('dialog'))}
+  function isSaved(x){return x.status==='saved'||x.status==='cooked'}
+  function badge(x){return x.status==='cooked'?'<span class="status-badge cooked">🎉 Cooked</span>':x.status==='saved'?'<span class="status-badge saved">⭐ Saved</span>':'<span class="status-badge">📝 Not saved</span>'}
+  function thumb(x){return '<div class="thumb">'+(x.photo?'<img alt="" src="'+x.photo+'">':x.emoji)+'</div>'}
+  function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){t.hidden=true},2400)}
+  function dialog(html,ready){$('dialog').innerHTML=html;$('scrim').hidden=false;if(ready)ready($('dialog'))}
   function closeDialog(){$('scrim').hidden=true}
-  function confirmBox(title,msg,okLabel,danger,fn){
-    dialog('<h2>'+esc(title)+'</h2><p>'+esc(msg)+'</p><div class="row"><button class="btn sm'+(danger?' danger':'')+'" id="dOk">'+esc(okLabel)+'</button><button class="btn ghost sm" id="dNo">Cancel</button></div>',function(){
+  function confirmBox(title,msg,ok,danger,fn){
+    dialog('<h2>'+esc(title)+'</h2><p>'+esc(msg)+'</p><div class="row"><button class="btn sm'+(danger?' danger':'')+'" id="dOk">'+esc(ok)+'</button><button class="btn ghost sm" id="dNo">Cancel</button></div>',function(){
       $('dOk').onclick=function(){closeDialog();fn()};$('dNo').onclick=closeDialog});
   }
 
+  function render(s){
+    if(s==='recipe')renderRecipe();else if(s==='history')renderHistory();else if(s==='saved')renderSaved();
+  }
+
+  /* ---------- Recipe + chat ---------- */
+  function renderRecipe(){
+    var r=cur();if(!r)return;
+    var backLabel=backTo==='history'?'← History':backTo==='saved'?'← My Recipes':'← Back to ingredients';
+    var h='<div class="bar"><button class="btn ghost sm" data-act="back">'+backLabel+'</button>'+
+      '<button class="btn alt sm" data-act="toggle-refine">✏️ Refine</button>'+
+      '<button class="btn ghost sm" data-act="duplicate">⧉ Duplicate</button><span class="grow"></span>'+
+      '<button class="btn ghost sm" data-act="new-session">＋ New session</button></div>'+
+      '<div class="card" id="refinePanel" hidden><h3>Refine this recipe</h3><div class="chips" data-chips style="margin:8px 0">'+
+      ['Spicier','Quicker','Fewer ingredients','Lighter','Kid-friendly','One-pan','Double the servings'].map(function(c){return '<span class="chip" role="button" aria-pressed="false">'+c+'</span>'}).join('')+
+      '</div><textarea id="refineText" placeholder="Or say it in your own words, e.g. swap the chicken for chickpeas…"></textarea>'+
+      '<div class="row" style="margin-top:10px"><button class="btn sm" data-act="apply-refine">Update recipe</button><button class="btn ghost sm" data-act="toggle-refine">Cancel</button></div></div>'+
+      '<div class="grid two"><div class="card">';
+    if(editing){
+      h+='<h2>Edit recipe</h2><label class="lbl" for="eTitle">Name</label><input class="field" id="eTitle" value="'+esc(r.title)+'">'+
+        '<label class="lbl" for="eList">List</label><select class="field" id="eList"><option value="">Not in a list</option>'+lists.map(function(l){return '<option value="'+l.id+'"'+(l.id===r.list?' selected':'')+'>'+esc(l.name)+'</option>'}).join('')+'</select>'+
+        '<label class="lbl" for="eIng">Ingredients (one per line)</label><textarea class="editbox" id="eIng">'+esc(r.ing.join('\n'))+'</textarea>'+
+        '<label class="lbl" for="eSteps">Method (one step per line)</label><textarea class="editbox" id="eSteps">'+esc(r.steps.join('\n'))+'</textarea>'+
+        '<div class="row" style="margin-top:14px"><button class="btn sm" data-act="save-edit">Save changes</button><button class="btn ghost sm" data-act="cancel-edit">Cancel</button></div>';
+    }else{
+      if(r.photo)h+='<div class="photo has"><img alt="Photo of '+esc(r.title)+'" src="'+r.photo+'"><div class="over"><span class="badge">📷 My photo</span><button class="btn alt sm" data-act="cooked">Change photo</button></div></div>';
+      else h+='<div class="photo"><span class="badge">AI-generated · what it might look like</span><span class="row"><button class="btn alt sm" data-act="ai-photo">🎨 AI photo</button><button class="btn sm" data-act="cooked">📷 My photo</button></span></div>';
+      h+='<h2 style="margin-top:14px">'+esc(r.title)+'</h2><div class="meta">'+badge(r)+'<span class="badge">⏱ '+r.time+' min</span>'+r.tags.map(function(t){return '<span class="badge">'+esc(t)+'</span>'}).join('')+'<span class="badge">📋 '+esc(listName(r.list))+'</span><span class="badge">'+esc(r.date)+'</span></div>'+
+        '<h3>You\'ll need</h3><ul class="ing">'+r.ing.map(function(i){return '<li>'+esc(i)+'</li>'}).join('')+'</ul>'+
+        '<h3>Method</h3><ol class="steps">'+r.steps.map(function(i){return '<li>'+esc(i)+'</li>'}).join('')+'</ol>'+
+        '<div class="row" style="margin-top:12px"><button class="btn sm" data-act="cooked">🎉 I cooked it!</button>'+
+        (isSaved(r)?'':'<button class="btn alt sm" data-act="save-current">💾 Save recipe</button>')+
+        '<button class="btn ghost sm" data-act="add-to-list">📋 '+(r.list?'Change list':'Add to list')+'</button>'+
+        '<button class="btn ghost sm" data-act="edit">✏️ Edit</button><button class="btn danger sm" data-act="delete-recipe">🗑 Delete</button></div>';
+    }
+    h+='</div><div class="card"><h2>Ask Chef Buddy</h2><div class="chat" id="chatBox">'+
+      r.chat.map(function(m){return m.r==='note'?'<div class="note">'+esc(m.t)+'</div>':'<div class="msg '+m.r+'">'+esc(m.t)+'</div>'}).join('')+
+      '</div><form class="sendrow" data-form="chat"><input class="field" id="chatIn" placeholder="Ask a question…" autocomplete="off"><button class="btn">Send</button></form></div></div>';
+    $('recipeRoot').innerHTML=h;
+    var cb=$('chatBox');if(cb)cb.scrollTop=cb.scrollHeight;
+  }
+
+  /* ---------- History ---------- */
+  function renderHistory(){
+    var f=[['all','All'],['cooked','🎉 Cooked'],['saved','⭐ Saved'],['draft','📝 Not saved']];
+    var vis=sessions.filter(function(x){return histFilter==='all'||x.status===histFilter});
+    var h='<div class="card"><h2 style="margin-bottom:4px">History</h2><p class="small" style="margin:0 0 10px">Every session you have started, newest first. Open one to carry on chatting.</p><div class="chips">'+
+      f.map(function(c){return '<span class="chip" role="button" data-act="hist-filter" data-id="'+c[0]+'" aria-pressed="'+(histFilter===c[0])+'">'+c[1]+'</span>'}).join('')+'</div></div>';
+    if(!vis.length)h+='<div class="card empty"><h3>Nothing here yet</h3></div>';
+    else{h+='<div class="grid two">';vis.forEach(function(x){h+='<div class="card rcard" data-act="open" data-from="history" data-id="'+x.id+'" tabindex="0">'+thumb(x)+'<div><h3>'+esc(x.title)+'</h3><span class="small">'+esc(x.date)+' · 💬 '+x.chat.length+'</span><br>'+badge(x)+'</div><span class="go">Open →</span></div>'});h+='</div>'}
+    $('historyRoot').innerHTML=h;
+  }
+
+  /* ---------- My Recipes ---------- */
   function renderSaved(){
-    var vis=recipes.filter(function(r){return (activeList==='all'||r.list===activeList)&&r.title.toLowerCase().indexOf(query.toLowerCase())>-1});
+    var mine=sessions.filter(isSaved);
+    var vis=mine.filter(function(r){return (activeList==='all'||r.list===activeList)&&r.title.toLowerCase().indexOf(query.toLowerCase())>-1});
     var h='<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">My Recipes</h2><button class="btn alt sm" data-act="new-list">＋ New list</button></div>';
     if(adding)h+='<form class="inlineform" data-form="add-list"><input class="field" id="newListName" placeholder="Name your new list…" maxlength="40"><button class="btn sm">Create</button><button type="button" class="btn ghost sm" data-act="cancel-list">Cancel</button></form>';
-    h+='<div class="chips" style="margin:12px 0"><span class="chip" role="button" data-act="pick-list" data-id="all" aria-pressed="'+(activeList==='all')+'">All ('+recipes.length+')</span>';
-    lists.forEach(function(l){var n=recipes.filter(function(r){return r.list===l.id}).length;h+='<span class="chip" role="button" data-act="pick-list" data-id="'+l.id+'" aria-pressed="'+(activeList===l.id)+'">'+esc(l.name)+' ('+n+')</span>'});
+    h+='<div class="chips" style="margin:12px 0"><span class="chip" role="button" data-act="pick-list" data-id="all" aria-pressed="'+(activeList==='all')+'">All ('+mine.length+')</span>';
+    lists.forEach(function(l){var n=mine.filter(function(r){return r.list===l.id}).length;h+='<span class="chip" role="button" data-act="pick-list" data-id="'+l.id+'" aria-pressed="'+(activeList===l.id)+'">'+esc(l.name)+' ('+n+')</span>'});
     h+='</div>';
     if(activeList!=='all'){
       if(renaming)h+='<form class="inlineform mgmt" data-form="rename-list"><input class="field" id="renameName" value="'+esc(listName(activeList))+'" maxlength="40"><button class="btn sm">Save name</button><button type="button" class="btn ghost sm" data-act="cancel-rename">Cancel</button></form>';
@@ -368,93 +416,98 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
     }
     h+='<input class="field" id="searchBox" placeholder="🔍 Search recipes…" value="'+esc(query)+'"></div>';
     if(!vis.length)h+='<div class="card empty"><h3>Nothing here yet</h3><p>Cook something and tap Save, or add recipes to this list.</p><button class="btn sm" data-go="home">🍳 Start cooking</button></div>';
-    else{h+='<div class="grid two">';vis.forEach(function(r){h+='<div class="card rcard" data-act="open" data-id="'+r.id+'" tabindex="0"><div class="thumb">'+r.emoji+'</div><div><h3>'+esc(r.title)+'</h3><span class="small">'+esc(r.tags.join(' · '))+' · '+r.time+' min · '+esc(listName(r.list))+'</span></div></div>'});h+='</div>'}
-    var focusSearch=document.activeElement&&document.activeElement.id==='searchBox';
+    else{h+='<div class="grid two">';vis.forEach(function(r){h+='<div class="card rcard" data-act="open" data-from="saved" data-id="'+r.id+'" tabindex="0">'+thumb(r)+'<div><h3>'+esc(r.title)+'</h3><span class="small">'+esc(r.tags.join(' · '))+' · '+r.time+' min · '+esc(listName(r.list))+'</span><br>'+badge(r)+'</div></div>'});h+='</div>'}
+    var fs=document.activeElement&&document.activeElement.id==='searchBox';
     $('savedRoot').innerHTML=h;
-    if(focusSearch){var sb=$('searchBox');sb.focus();sb.setSelectionRange(sb.value.length,sb.value.length)}
-    var f=$('newListName')||$('renameName');if(f&&!focusSearch){f.focus();f.select&&f.select()}
+    if(fs){var sb=$('searchBox');sb.focus();sb.setSelectionRange(sb.value.length,sb.value.length)}
+    var f=$('newListName')||$('renameName');if(f&&!fs){f.focus();f.select&&f.select()}
   }
 
-  function renderDetail(){
-    var r=recipes.filter(function(x){return x.id===openId})[0];if(!r){show('saved');return}
-    var h='<div class="bar"><button class="btn ghost sm" data-act="back-saved">← My Recipes</button><span class="grow"></span>';
-    if(!editing)h+='<button class="btn alt sm" data-act="edit">✏️ Edit</button><button class="btn danger sm" data-act="delete-recipe">🗑 Delete</button>';
-    h+='</div><div class="card">';
-    if(editing){
-      h+='<h2>Edit recipe</h2><label class="lbl" for="eTitle">Name</label><input class="field" id="eTitle" value="'+esc(r.title)+'">'+
-         '<label class="lbl" for="eList">List</label><select class="field" id="eList"><option value="">Not in a list</option>'+lists.map(function(l){return '<option value="'+l.id+'"'+(l.id===r.list?' selected':'')+'>'+esc(l.name)+'</option>'}).join('')+'</select>'+
-         '<label class="lbl" for="eIng">Ingredients (one per line)</label><textarea class="editbox" id="eIng">'+esc(r.ing.join('\n'))+'</textarea>'+
-         '<label class="lbl" for="eSteps">Method (one step per line)</label><textarea class="editbox" id="eSteps">'+esc(r.steps.join('\n'))+'</textarea>'+
-         '<div class="row" style="margin-top:14px"><button class="btn sm" data-act="save-edit">Save changes</button><button class="btn ghost sm" data-act="cancel-edit">Cancel</button></div>';
-    }else{
-      h+='<div class="photo"><span class="badge">'+r.emoji+' AI-generated photo goes here</span><button class="btn alt sm">🎨 New photo</button></div>'+
-         '<h2 style="margin-top:14px">'+esc(r.title)+'</h2><div class="meta"><span class="badge">⏱ '+r.time+' min</span>'+r.tags.map(function(t){return '<span class="badge">'+esc(t)+'</span>'}).join('')+'<span class="badge">📋 '+esc(listName(r.list))+'</span></div>'+
-         '<h3>You\'ll need</h3><ul class="ing">'+r.ing.map(function(i){return '<li>'+esc(i)+'</li>'}).join('')+'</ul>'+
-         '<h3>Method</h3><ol class="steps">'+r.steps.map(function(i){return '<li>'+esc(i)+'</li>'}).join('')+'</ol>'+
-         '<div class="row" style="margin-top:12px"><button class="btn sm" data-act="cook-again">🍳 Cook it again with Chef Buddy</button></div>';
-    }
-    $('detailRoot').innerHTML=h+'</div>';
-  }
-
-  function openRecipe(id){openId=id;window.__open=true;editing=false;renderDetail();show('detail')}
-  function saveCurrent(){
-    if(recipes.some(function(r){return r.title==='Garlicky Chicken & Spinach Rice'})){toast('Already in My Recipes');return}
-    recipes.unshift({id:nextId++,title:'Garlicky Chicken & Spinach Rice',emoji:'🍗',tags:['Halal','Nut-free'],time:35,list:'',ing:['400 g chicken thighs','1 cup basmati rice','150 g spinach','½ cup yoghurt','3 cloves garlic'],steps:['Marinate the chicken in yoghurt and garlic for 10 minutes.','Sear the chicken until golden, about 5 minutes per side.','Add rice and 2 cups water, cover and simmer 12 minutes.','Fold in the spinach and rest for 5 minutes.']});
-    $('saveBtn').textContent='✔ Saved';toast('Saved to My Recipes');renderSaved();
+  /* ---------- actions ---------- */
+  function openSession(id,from){currentId=id;backTo=from;editing=false;show('recipe')}
+  function cookedDialog(){
+    var r=cur();var picked=null;
+    dialog('<h2>🎉 You cooked it!</h2><p>Add a photo of your finished dish. It saves this recipe to My Recipes with your photo.</p>'+
+      '<input type="file" id="photoIn" accept="image/*" capture="environment" class="field">'+
+      '<img id="photoPrev" class="preview" alt="Preview of your photo" hidden>'+
+      '<div class="row"><button class="btn sm" id="dSave">Save</button><button class="btn ghost sm" id="dSkip">Save without photo</button><button class="btn ghost sm" id="dNo">Cancel</button></div>',function(){
+      $('photoIn').onchange=function(){var f=this.files&&this.files[0];if(!f)return;var fr=new FileReader();fr.onload=function(){picked=fr.result;$('photoPrev').src=picked;$('photoPrev').hidden=false};fr.readAsDataURL(f)};
+      function done(withPhoto){if(withPhoto&&picked)r.photo=picked;r.status='cooked';closeDialog();renderRecipe();toast(withPhoto&&picked?'Saved with your photo':'Marked as cooked and saved')}
+      $('dSave').onclick=function(){if(!picked){toast('Pick or take a photo first, or choose “Save without photo”');return}done(true)};
+      $('dSkip').onclick=function(){done(false)};$('dNo').onclick=closeDialog});
   }
   function newSession(){
-    $('ingChips').innerHTML='';$('want').value='';$('ing').value='';$('refineText').value='';$('refinePanel').hidden=true;
-    document.querySelectorAll('#refinePanel .chip').forEach(function(c){c.setAttribute('aria-pressed','false')});
-    $('chatBox').innerHTML='<div class="msg ai">Fresh start! Tell me what\'s in the fridge or what you fancy. 👨‍🍳</div>';
-    $('saveBtn').textContent='💾 Save recipe';show('home');toast('New session started');
+    $('ingChips').innerHTML='';$('want').value='';$('ing').value='';
+    currentId=null;backTo='home';editing=false;show('home');toast('New session started');
   }
 
   document.addEventListener('click',function(e){
+    var rm=e.target.closest('#ingChips .chip');if(rm){rm.remove();return}
     var t=e.target.closest('[data-act]');if(!t)return;
-    var a=t.dataset.act,id=t.dataset.id;
-    if(a==='toggle-refine'){var p=$('refinePanel');p.hidden=!p.hidden}
-    else if(a==='apply-refine'){$('refinePanel').hidden=true;toast('Chef Buddy is updating the recipe…')}
-    else if(a==='new-session')confirmBox('Start a new session?','Your ingredients, chat and this recipe will be cleared. Save the recipe first if you want to keep it.','Start new',false,newSession);
-    else if(a==='save-current')saveCurrent();
-    else if(a==='add-to-list'){
-      dialog('<h2>Add to which list?</h2><div class="chips">'+lists.map(function(l){return '<span class="chip" role="button" data-pick="'+l.id+'">'+esc(l.name)+'</span>'}).join('')+'</div><div class="row" style="margin-top:14px"><button class="btn ghost sm" id="dNo">Cancel</button></div>',function(d){
-        $('dNo').onclick=closeDialog;
-        d.querySelectorAll('[data-pick]').forEach(function(c){c.onclick=function(){saveCurrent();var r=recipes[0];if(r&&r.title==='Garlicky Chicken & Spinach Rice')r.list=c.dataset.pick;closeDialog();renderSaved();toast('Added to '+listName(c.dataset.pick))}})});
+    var a=t.dataset.act,id=t.dataset.id,r=cur();
+    if(a==='cook'){
+      var n=sessions.filter(function(x){return x.id>=200}).length;
+      var x={id:200+n,title:'Garlicky Chicken & Spinach Rice',emoji:'🍗',tags:['Halal','Nut-free'],time:35,date:'Today',status:'draft',list:'',photo:null,
+        ing:['400 g chicken thighs','1 cup basmati rice','150 g spinach','½ cup yoghurt','3 cloves garlic'],steps:['Marinate the chicken in yoghurt and garlic for 10 minutes.','Sear the chicken until golden, about 5 minutes per side.','Add rice and 2 cups water, cover and simmer 12 minutes.','Fold in the spinach and rest for 5 minutes.'],
+        chat:[{r:'ai',t:"Here's a recipe from what's in your fridge! Shout if you hit a snag. 👨‍🍳"}]};
+      sessions.push(x);openSession(x.id,'home');
     }
+    else if(a==='back'){show(backTo)}
+    else if(a==='toggle-refine'){var p=$('refinePanel');p.hidden=!p.hidden}
+    else if(a==='apply-refine'){
+      var tw=[].map.call(document.querySelectorAll('#refinePanel .chip[aria-pressed="true"]'),function(c){return c.textContent});
+      var txt=$('refineText').value.trim();var ask=tw.concat(txt?[txt]:[]).join(', ')||'a small tweak';
+      r.chat.push({r:'me',t:'Refine: '+ask});r.chat.push({r:'ai',t:'Done! I have updated the recipe. (In the real app the recipe above changes here.)'});renderRecipe();toast('Recipe refined');
+    }
+    else if(a==='new-session'){
+      confirmBox('Start a new session?',isSaved(r)?'This recipe is saved, so you can come back to it any time.':'This recipe is not saved yet. It stays in History as “Not saved” so you can come back to it.','Start new',false,newSession);
+    }
+    else if(a==='duplicate'){
+      var c=JSON.parse(JSON.stringify(r));c.id=200+sessions.length+Math.floor(Math.random()*1000);c.title=r.title+' (copy)';c.status='saved';c.photo=null;c.date='Today';
+      c.chat=[{r:'note',t:'Duplicated from “'+r.title+'”. Tell me what to change and I will update this copy.'}];
+      sessions.push(c);openSession(c.id,backTo);toast('Duplicate created, ready to edit');
+    }
+    else if(a==='save-current'){r.status='saved';renderRecipe();toast('Saved to My Recipes')}
+    else if(a==='cooked')cookedDialog();
+    else if(a==='ai-photo')toast('The real app generates a photo with OpenAI here');
+    else if(a==='add-to-list'){
+      dialog('<h2>Which list?</h2><div class="chips">'+lists.map(function(l){return '<span class="chip" role="button" data-pick="'+l.id+'">'+esc(l.name)+'</span>'}).join('')+'<span class="chip" role="button" data-pick="">None</span></div><div class="row" style="margin-top:14px"><button class="btn ghost sm" id="dNo">Cancel</button></div>',function(d){
+        $('dNo').onclick=closeDialog;
+        d.querySelectorAll('[data-pick]').forEach(function(c){c.onclick=function(){r.list=c.dataset.pick;if(r.list&&r.status==='draft')r.status='saved';closeDialog();renderRecipe();toast(r.list?'Added to '+listName(r.list):'Removed from list')}})});
+    }
+    else if(a==='edit'){editing=true;renderRecipe()}
+    else if(a==='cancel-edit'){editing=false;renderRecipe()}
+    else if(a==='save-edit'){
+      var ln=function(v){return v.split('\n').map(function(x){return x.trim()}).filter(Boolean)};
+      r.title=$('eTitle').value.trim()||r.title;r.list=$('eList').value;r.ing=ln($('eIng').value);r.steps=ln($('eSteps').value);
+      if(r.list&&r.status==='draft')r.status='saved';editing=false;renderRecipe();toast('Changes saved');
+    }
+    else if(a==='delete-recipe')confirmBox('Delete "'+r.title+'"?','This removes the recipe and its chat from My Recipes and History. You can\'t undo it.','Delete recipe',true,function(){
+      sessions=sessions.filter(function(x){return x.id!==r.id});currentId=null;show(backTo==='home'?'history':backTo);toast('Recipe deleted')});
+    else if(a==='open')openSession(+id,t.dataset.from);
+    else if(a==='hist-filter'){histFilter=id;renderHistory()}
     else if(a==='new-list'){adding=true;renaming=false;renderSaved()}
     else if(a==='cancel-list'){adding=false;renderSaved()}
     else if(a==='pick-list'){activeList=id;renaming=false;adding=false;renderSaved()}
     else if(a==='rename-list'){renaming=true;renderSaved()}
     else if(a==='cancel-rename'){renaming=false;renderSaved()}
     else if(a==='delete-list')confirmBox('Delete "'+listName(activeList)+'"?','The recipes stay in My Recipes. Only the list is removed.','Delete list',true,function(){
-      var gone=activeList;recipes.forEach(function(r){if(r.list===gone)r.list=''});lists=lists.filter(function(l){return l.id!==gone});activeList='all';renderSaved();toast('List deleted')});
-    else if(a==='open')openRecipe(+id);
-    else if(a==='back-saved'){editing=false;window.__open=false;renderSaved();show('saved')}
-    else if(a==='edit'){editing=true;renderDetail()}
-    else if(a==='cancel-edit'){editing=false;renderDetail()}
-    else if(a==='save-edit'){
-      var r=recipes.filter(function(x){return x.id===openId})[0];
-      var lines=function(v){return v.split('\n').map(function(x){return x.trim()}).filter(Boolean)};
-      r.title=$('eTitle').value.trim()||r.title;r.list=$('eList').value;r.ing=lines($('eIng').value);r.steps=lines($('eSteps').value);
-      editing=false;renderDetail();renderSaved();toast('Changes saved');
-    }
-    else if(a==='delete-recipe'){
-      var rr=recipes.filter(function(x){return x.id===openId})[0];
-      confirmBox('Delete "'+rr.title+'"?','This removes the recipe from My Recipes. You can\'t undo it.','Delete recipe',true,function(){
-        recipes=recipes.filter(function(x){return x.id!==openId});window.__open=false;renderSaved();show('saved');toast('Recipe deleted')});
-    }
-    else if(a==='cook-again'){toast('Opening it in the recipe screen with chat…');show('recipe')}
+      var gone=activeList;sessions.forEach(function(x){if(x.list===gone)x.list=''});lists=lists.filter(function(l){return l.id!==gone});activeList='all';renderSaved();toast('List deleted')});
   });
   document.addEventListener('submit',function(e){
     e.preventDefault();var f=e.target.dataset.form;
     if(f==='add-list'){var n=$('newListName').value.trim();if(!n)return;var id='l'+(nextId++);lists.push({id:id,name:n});activeList=id;adding=false;renderSaved();toast('List created')}
     else if(f==='rename-list'){var m=$('renameName').value.trim();if(!m)return;lists.forEach(function(l){if(l.id===activeList)l.name=m});renaming=false;renderSaved();toast('List renamed')}
+    else if(f==='chat'){var v=$('chatIn').value.trim();if(!v)return;var r=cur();r.chat.push({r:'me',t:v});r.chat.push({r:'ai',t:'Good question! In the real app Claude answers here, using this recipe as context.'});renderRecipe();$('chatIn').focus()}
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape')closeDialog();
+    if(e.key==='Enter'&&e.target.id==='ing'){e.preventDefault();var v=e.target.value.trim();if(v){var c=document.createElement('span');c.className='chip rm';c.textContent=v+' ✕';$('ingChips').appendChild(c);e.target.value=''}}
+    if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.rcard')){e.preventDefault();e.target.click()}
   });
   document.addEventListener('input',function(e){if(e.target.id==='searchBox'){query=e.target.value;renderSaved()}});
   $('scrim').addEventListener('click',function(e){if(e.target===$('scrim'))closeDialog()});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDialog();
-    if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.rcard')){e.preventDefault();e.target.click()}});
-  renderSaved();
+  show((location.hash||'#home').slice(1));
 })();
 </script>
 </body>
