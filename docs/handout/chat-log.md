@@ -96,3 +96,9 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - What the plan did well (teaching points): it summarised the project in its own words; it found a real blocker (Node.js not installed or not on PATH); it listed 19 gaps and risks in the specs instead of guessing; it listed exactly which files Phase 0 creates and how each will be verified; it asked 3 questions before starting.
 - Gaps worth noting in the handout: the mockup's JavaScript is not safe to port (it builds HTML from strings), so only its CSS is reused; theme without flicker needs a localStorage mirror; the spec's upload size limits contradicted each other (4 photos x 8 MB x 1.33 > 25 MB), to be fixed in Phase 5.
 - Lesson: this is recursive refinement in action. Read the plan, answer its questions, challenge it, then approve.
+
+## Session 1 – Letting Claude Code install Node.js
+- Aziz's question: why install Node by hand? Claude Code can run `winget` itself. Correct: it can run commands on the PC. The one thing it cannot do is approve Windows' own security prompt.
+- Instruction given to Claude Code (approved plan with option 1, auto mode): confirm the package id with `winget search`, install Node.js LTS (22 or newer) with the agreements accepted, write a script if admin rights are needed, refresh PATH in its own shell (or call node by its full path), confirm `node -v` and `npm -v`, then continue Phase 0.
+- **Windows showed a permission prompt (User Account Control, "Do you want to allow this app to make changes?") during the install. Aziz clicked Yes.** Handout note: this is normal and expected when installing software. Read what is asking, and click Yes only if you started the install. Claude Code cannot click it for you.
+- Handout tip: let Claude Code do setup chores (installing tools, creating folders) and keep the human for approvals and review.
