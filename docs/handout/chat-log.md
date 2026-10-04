@@ -48,3 +48,9 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
   - Working chat box, Refine messages go into the chat, **New session** no longer loses unsaved work (it stays in History).
   - Recipe view/edit/delete is now one screen shared by History and My Recipes.
 - Screenshots: `mockup-a-light-history.png`, `mockup-a-light-cooked-dialog.png`, `mockup-a-light-recipe-cooked-photo.png`, `mockup-a-light-duplicate.png`, `mockup-a-light-saved-with-photo.png`, `mockup-a-light-phone-history.png`.
+
+## Session 1 – Mockup approved
+- Screenshot `03-claude-code-session-mockup-artifact.png`: the Claude Code web session (chat on the left) with the Chef Buddy mockup artifact open on the right (design A, dark theme).
+- Aziz: the design "looks good" (design A shown).
+- **Handout must teach recursive refinement:** do not accept the first thing the AI generates. Review it, understand all of it, ask for changes, and repeat.
+- Next: write CLAUDE.md, the spec files and a downloadable starter package. No app code yet.
