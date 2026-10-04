@@ -61,3 +61,10 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - Specs verified against vendor docs on 2026-10-04: Claude `/v1/models` (capabilities.image_input), image input rules (base64, 10 MB, resize to 1568px), streaming SDK helper, Claude Code Windows install, OpenAI image models (`gpt-image-2.5-*`, base64 response, sizes, quality).
 - Build plan: Phase 0 skeleton, 1 design system and shell, 2 settings and live model lists, 3 data layer and lists, 4 recipes/chat/refine, 5 photos and "I cooked it", 6 AI photo, 7 polish. Each phase: plan, build, run, explain, challenge, commit.
 - Deliverable zip: `chef-buddy-starter.zip` (sent to Aziz in chat).
+
+## Session 1 – Aziz set up his PC
+- `04-github-default-branch-main.png`: GitHub Settings, default branch changed to `main`.
+- `05-git-clone-into-folder.png`: `git clone -b main https://github.com/frozenfussion/Recipes .` into the empty Windows folder, then `dir` showing the project files.
+- `06-claude-code-first-start.png`: Claude Code v2.1.289 started in the project folder (Sonnet 5.5, auto mode on, effort medium).
+- Handout tip: before the first prompt, press Shift+Tab until it says plan mode, so Claude Code plans before it changes anything.
+- The first prompt is in `START-HERE.md` (section 3) and was pasted into the chat as copyable text.
