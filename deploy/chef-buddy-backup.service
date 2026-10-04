@@ -1,0 +1,19 @@
+# One backup run: copies data/ into ~/backups/chef-buddy/<time>/ and keeps the newest 14.
+# Started every night by chef-buddy-backup.timer. Run it by hand with:
+#   sudo systemctl start chef-buddy-backup.service
+[Unit]
+Description=Chef Buddy backup of the data folder
+
+[Service]
+Type=oneshot
+User=aziz
+Group=aziz
+WorkingDirectory=/home/aziz/projects/recipes
+Environment=BACKUP_DIR=/home/aziz/backups/chef-buddy
+Environment=BACKUP_KEEP=14
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning scripts/backup.js
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/aziz/backups/chef-buddy

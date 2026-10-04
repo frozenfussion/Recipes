@@ -59,7 +59,7 @@ export async function renderSettings(root, isCurrent) {
       h('h2', null, 'Look & feel'),
       chipChoice([['light', '☀️ Light'], ['dark', '🌙 Dark'], ['device', '🖥 Match my device']], getTheme(), saveTheme)),
     h('p', { class: 'small' },
-      'Your keys and recipes stay on this computer. Text and photos you send are processed by Anthropic (Claude) and, for AI photos, OpenAI, under their terms.'));
+      `Your keys and recipes stay on this ${settings.keysOnServer ? 'server' : 'computer'}. Text and photos you send are processed by Anthropic (Claude) and, for AI photos, OpenAI, under their terms.`));
 
   fillCard(claudeHost, CLAUDE, settings);
   fillCard(openaiHost, OPENAI, settings);
@@ -79,13 +79,19 @@ function fillCard(host, cfg, settings) {
     class: 'field', type: 'password', id: `key-${cfg.keyField}`, autocomplete: 'off', spellcheck: 'false',
     placeholder: info.hasKey ? `Saved: ${info.maskedKey}` : cfg.keyPlaceholder,
   });
-  const keyStatus = h('span', { class: 'status' }, info.hasKey ? 'Key saved' : 'No key yet');
+  // On a server the keys live in a protected file there, so this page only shows whether one is set.
+  const onServer = settings.keysOnServer;
+  const serverText = info.hasKey ? `Set on the server: ${info.maskedKey}` : 'Not set on the server';
+  const keyStatus = h('span', { class: 'status' }, onServer ? serverText : (info.hasKey ? 'Key saved' : 'No key yet'));
 
   // Test and Refresh work with the SAVED key. A key that is typed but not saved yet, or no key at all,
   // gets a clear instruction instead of a spinner that has nothing to wait for.
   const mustSaveFirst = () => {
     if (keyInput.value.trim()) { toast('Press Save key first'); return true; }
-    if (!info.hasKey) { toast(`Add your ${cfg.vendor} key and press Save key first`); return true; }
+    if (!info.hasKey) {
+      toast(onServer ? `No ${cfg.vendor} key on the server yet` : `Add your ${cfg.vendor} key and press Save key first`);
+      return true;
+    }
     return false;
   };
   const savedStatus = keyStatus.textContent;
@@ -124,7 +130,7 @@ function fillCard(host, cfg, settings) {
     }
   });
 
-  const removeBtn = info.hasKey
+  const removeBtn = info.hasKey && !onServer
     ? h('button', { type: 'button', class: 'btn danger sm' }, 'Remove key')
     : null;
   if (removeBtn) {
@@ -148,7 +154,9 @@ function fillCard(host, cfg, settings) {
   // Model picker
   const select = h('select', { class: 'field', id: `model-${cfg.modelField}`, 'aria-label': cfg.modelLabel, disabled: true });
   const refreshBtn = h('button', { type: 'button', class: 'btn ghost sm' }, '↻ Refresh');
-  const listNote = h('p', { class: 'small' }, info.hasKey ? 'Loading the live model list…' : `Add your ${cfg.vendor} key above to load the model list.`);
+  const listNote = h('p', { class: 'small' }, info.hasKey
+    ? 'Loading the live model list…'
+    : (onServer ? `The model list loads once a ${cfg.vendor} key is set on the server.` : `Add your ${cfg.vendor} key above to load the model list.`));
   const warning = h('div', { class: 'warn', hidden: true, role: 'alert' });
   const manualInput = h('input', { class: 'field', placeholder: 'e.g. a model id from the vendor docs', 'aria-label': 'Model id', maxlength: '200' });
   const manualBtn = h('button', { type: 'button', class: 'btn ghost sm' }, 'Use this id');
@@ -207,12 +215,22 @@ function fillCard(host, cfg, settings) {
     if (id) saveModel(id).then(() => { manualInput.value = ''; });
   });
 
+  const keyPart = onServer
+    ? [
+      h('p', { class: 'lbl' }, cfg.keyLabel),
+      h('div', { class: 'row' }, keyStatus, testBtn),
+      h('p', { class: 'small' }, 'On this server the key is kept in a protected file, not in the app, so it cannot be changed on this page. The server admin sets it.'),
+    ]
+    : [
+      h('label', { class: 'lbl', for: keyInput.id }, cfg.keyLabel),
+      h('div', { class: 'keyrow' }, keyInput, testBtn),
+      h('div', { class: 'row' }, saveBtn, removeBtn, keyStatus),
+      h('p', { class: 'small' }, `${cfg.keyHelp}${info.hasKey ? ' To replace your saved key, paste a new one and press Save key.' : ''}`),
+    ];
+
   const children = [
     h('h2', null, cfg.title),
-    h('label', { class: 'lbl', for: keyInput.id }, cfg.keyLabel),
-    h('div', { class: 'keyrow' }, keyInput, testBtn),
-    h('div', { class: 'row' }, saveBtn, removeBtn, keyStatus),
-    h('p', { class: 'small' }, `${cfg.keyHelp}${info.hasKey ? ' To replace your saved key, paste a new one and press Save key.' : ''}`),
+    ...keyPart,
     h('label', { class: 'lbl', for: select.id }, cfg.modelLabel),
     h('div', { class: 'keyrow' }, select, refreshBtn),
     listNote,

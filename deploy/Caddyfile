@@ -1,0 +1,25 @@
+# Caddy: the only door in from the internet. It gets and renews the HTTPS certificate by itself,
+# redirects http:// to https://, asks for the login, then passes the request to the app on
+# 127.0.0.1:3000. Installed to /etc/caddy/Caddyfile by deploy/install-app.sh.
+
+recipes.faysalaziz.com {
+	# Login for the whole site. The user name and the password HASH are in a file that is
+	# not in this repo (made by deploy/set-password.sh). Caddy never logs the password.
+	import /etc/caddy/chef-buddy-auth.caddy
+
+	# The app accepts up to 25 MB of photos in one request; refuse anything bigger here already.
+	request_body {
+		max_size 26MB
+	}
+
+	header {
+		# Tell browsers to use HTTPS for this site from now on, even if someone types http://.
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	reverse_proxy 127.0.0.1:3000 {
+		# Send the chat reply to the browser word by word, as it streams in.
+		flush_interval -1
+	}
+}

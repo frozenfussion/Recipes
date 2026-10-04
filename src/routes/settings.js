@@ -1,15 +1,24 @@
 import { Router } from 'express';
 import { ApiError, friendlyAiError, logAiFailure } from '../lib/errors.js';
 import { maskKey } from '../lib/mask.js';
-import { deleteSetting, getSetting, setSetting } from '../lib/settings.js';
+import {
+  deleteSetting, getApiKey, getSetting, keysOnServer, noKeyMessage, setSetting,
+} from '../lib/settings.js';
 import { providerConfig } from '../lib/models.js';
 
 const THEMES = ['light', 'dark', 'device'];
 const QUALITIES = ['low', 'medium', 'high'];
 const MODEL_ID = /^[A-Za-z0-9._:/-]{1,200}$/;
 
-// Keys are plain text in the database on purpose (single user, own computer, see
-// docs/specs/07-settings-security.md). The browser only ever sees a masked form.
+// On your own computer keys are plain text in the database on purpose (single user, see
+// docs/specs/07-settings-security.md). On a server they come from a protected file instead and
+// cannot be changed here. Either way the browser only ever sees a masked form.
+function refuseOnServer(db) {
+  if (keysOnServer(db)) {
+    throw new ApiError(400, 'keys_on_server', 'API keys are set on the server, not on this page. The server admin changes them.');
+  }
+}
+
 function readKey(value, label) {
   if (value === undefined || value === null) return null;
   if (typeof value !== 'string') throw new ApiError(400, 'bad_key_format', `The ${label} key must be text.`);
@@ -22,9 +31,10 @@ function readKey(value, label) {
 }
 
 function publicSettings(db) {
-  const anthropicKey = getSetting(db, 'anthropic_api_key');
-  const openaiKey = getSetting(db, 'openai_api_key');
+  const anthropicKey = getApiKey(db, 'anthropic_api_key');
+  const openaiKey = getApiKey(db, 'openai_api_key');
   return {
+    keysOnServer: keysOnServer(db),
     claude: {
       hasKey: Boolean(anthropicKey),
       maskedKey: maskKey(anthropicKey),
@@ -50,6 +60,7 @@ export function settingsRouter(db, ai, limiter) {
     // Validate everything first so a bad field cannot leave a half-saved update.
     const anthropicKey = readKey(body.anthropicApiKey, 'Claude');
     const openaiKey = readKey(body.openaiApiKey, 'OpenAI');
+    if (anthropicKey || openaiKey) refuseOnServer(db);
     for (const [field, label] of [['claudeModel', 'Claude model'], ['imageModel', 'image model']]) {
       if (body[field] !== undefined && !MODEL_ID.test(String(body[field]))) {
         throw new ApiError(400, 'bad_model', `The ${label} id has characters that are not allowed.`);
@@ -79,6 +90,7 @@ export function settingsRouter(db, ai, limiter) {
     const names = { anthropic: ['anthropic_api_key', 'models_cache_claude'], openai: ['openai_api_key', 'models_cache_openai'] };
     const entry = names[req.params.provider];
     if (!entry) throw new ApiError(404, 'not_found', 'Unknown service.');
+    refuseOnServer(db);
     for (const key of entry) deleteSetting(db, key);
     res.json(publicSettings(db));
   });
@@ -90,8 +102,9 @@ export function settingsRouter(db, ai, limiter) {
       if (!service) throw new ApiError(404, 'not_found', 'Unknown service.');
       const cfg = providerConfig(service);
       const posted = readKey((req.body || {}).apiKey, cfg.label);
-      const apiKey = posted || getSetting(db, cfg.keySetting);
-      if (!apiKey) throw new ApiError(400, 'no_key', `No ${cfg.label} API key yet. Type one in first.`);
+      if (posted) refuseOnServer(db);
+      const apiKey = posted || getApiKey(db, cfg.keySetting);
+      if (!apiKey) throw new ApiError(400, 'no_key', noKeyMessage(db, cfg.label));
       try {
         await ai[cfg.service].checkKey(apiKey);
       } catch (err) {

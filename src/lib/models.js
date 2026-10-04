@@ -1,5 +1,5 @@
 import { ApiError, friendlyAiError, logAiFailure } from './errors.js';
-import { getSetting, setSetting } from './settings.js';
+import { getApiKey, getSetting, noKeyMessage, setSetting } from './settings.js';
 
 // Live model lists from the vendors, cached in the settings table for 24 hours.
 // No model name is ever written into the code: the lists decide.
@@ -46,10 +46,8 @@ function readCache(db, cfg) {
 // Returns { models, fetchedAt }, newest first.
 export async function loadModels(db, ai, provider, { refresh = false, now = Date.now() } = {}) {
   const cfg = PROVIDERS[provider];
-  const apiKey = getSetting(db, cfg.keySetting);
-  if (!apiKey) {
-    throw new ApiError(400, 'no_key', `No ${cfg.label} API key yet. Add one in Settings.`);
-  }
+  const apiKey = getApiKey(db, cfg.keySetting);
+  if (!apiKey) throw new ApiError(400, 'no_key', noKeyMessage(db, cfg.label));
 
   const cache = readCache(db, cfg);
   const fresh = cache && now - Date.parse(cache.fetchedAt) < DAY_MS;

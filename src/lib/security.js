@@ -33,12 +33,14 @@ export const isLoopbackHost = (host) => LOOPBACK.has(host);
 // Two checks that stop other websites from using your running Chef Buddy:
 // 1. Host check ("DNS rebinding"): when the app only listens on this computer, a request must
 //    really be addressed to localhost. A hostile site that points its own name at 127.0.0.1 fails.
+//    On a server behind Caddy, allowedHosts adds the public name (e.g. recipes.example.com).
 // 2. Origin check ("CSRF"): a request that changes something must come from our own page.
 //    Browsers add an Origin header to cross-site posts, so a different Origin is refused.
-export function requestGuard({ loopbackOnly = true } = {}) {
+export function requestGuard({ loopbackOnly = true, allowedHosts = [] } = {}) {
+  const allowed = new Set(allowedHosts.map((name) => name.toLowerCase()));
   return function guard(req, res, next) {
-    const host = String(req.headers.host || '').replace(/:\d+$/, '');
-    if (loopbackOnly && !LOOPBACK.has(host)) {
+    const host = String(req.headers.host || '').replace(/:\d+$/, '').toLowerCase();
+    if (loopbackOnly && !LOOPBACK.has(host) && !allowed.has(host)) {
       return next(new ApiError(403, 'bad_host', 'Chef Buddy only answers to localhost. Open http://localhost:3000.'));
     }
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && req.headers.origin) {

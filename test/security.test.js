@@ -113,3 +113,28 @@ test('the AI routes are rate limited with a friendly 429 and Retry-After, and a 
   assert.equal((await call('GET', '/api/sessions')).status, 200, 'reading is never limited');
   await new Promise((resolve) => { limited.close(resolve); limited.closeAllConnections(); });
 });
+
+test('behind a proxy, the public name in ALLOWED_HOSTS is accepted and other names are still refused', async () => {
+  const db = openDb(':memory:');
+  const server = createApp(db, { ai: fakeAi(), imagesDir: app.imagesDir, allowedHosts: ['recipes.example.com'] }).listen(0, '127.0.0.1');
+  await new Promise((resolve) => server.once('listening', resolve));
+  const { port } = server.address();
+  const call = (host, { method = 'GET', origin, body } = {}) => new Promise((resolve, reject) => {
+    const headers = { Host: host, ...(origin ? { Origin: origin } : {}), ...(body ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } : {}) };
+    const req = http.request({ host: '127.0.0.1', port, path: '/api/settings', method, headers }, (res) => { res.resume(); res.on('end', () => resolve(res.statusCode)); });
+    req.on('error', reject);
+    if (body) req.write(body);
+    req.end();
+  });
+  try {
+    assert.equal(await call('recipes.example.com'), 200);
+    assert.equal(await call('RECIPES.example.com'), 200, 'host names are not case sensitive');
+    assert.equal(await call('localhost:3000'), 200, 'localhost still works');
+    assert.equal(await call('evil.example.com'), 403);
+    const body = JSON.stringify({ theme: 'dark' });
+    assert.equal(await call('recipes.example.com', { method: 'PUT', origin: 'https://recipes.example.com', body }), 200, 'our own page through Caddy');
+    assert.equal(await call('recipes.example.com', { method: 'PUT', origin: 'https://evil.example.com', body }), 403, 'CSRF check still on');
+  } finally {
+    await new Promise((resolve) => { server.close(resolve); server.closeAllConnections(); });
+  }
+});

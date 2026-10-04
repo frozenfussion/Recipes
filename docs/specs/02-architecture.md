@@ -42,13 +42,17 @@ public/
 scripts/
   check-node.js        runs before start/dev/test, stops with a plain message on an old Node
   seed.js              npm run seed
+  backup.js            npm run backup (copy of data/ into a dated folder, keeps the newest 14)
+deploy/                server config (systemd units, Caddyfile) and sudo setup scripts, see docs/deploy-security.md
 test/                  node:test files, helpers.js holds the fake AI services
 data/                  git-ignored: chefbuddy.db, images/
+backups/               git-ignored: made by npm run backup on a PC
 ```
 
 ## Run
 - `PORT` (default 3000) and `HOST` (default `127.0.0.1`) from the environment or `.env`.
 - `DATA_DIR` (optional) moves `data/` somewhere else. The tests use it so they never touch your real data.
+- Server only: `ALLOWED_HOSTS` (extra host names) and `KEY_SOURCE=server` (keys from `CHEF_BUDDY_ANTHROPIC_KEY` / `CHEF_BUDDY_OPENAI_KEY`). See `docs/specs/07-settings-security.md`.
 - Single process. The server serves `public/` and the JSON API under `/api`.
 - Frontend is a single page with screen switching (Cook, Recipe, History, My Recipes, Settings). Deep links use a bare `#screen` hash, like the mockup: `#home`, `#recipe`, `#history`, `#saved`, `#settings`.
 
@@ -56,8 +60,8 @@ data/                  git-ignored: chefbuddy.db, images/
 | Method and path | Purpose |
 |---|---|
 | `GET /api/health` | `{ ok, schemaVersion }` |
-| `GET /api/settings` | Settings with keys **masked** and a `hasKey` flag |
-| `PUT /api/settings` | Save keys, models, quality, theme. An empty key field means "leave unchanged" |
+| `GET /api/settings` | Settings with keys **masked**, a `hasKey` flag and `keysOnServer` |
+| `PUT /api/settings` | Save keys, models, quality, theme. An empty key field means "leave unchanged". Keys are refused when `keysOnServer` |
 | `DELETE /api/settings/key/:provider` | The **Remove key** button (`anthropic` or `openai`) |
 | `POST /api/settings/test/anthropic` and `/openai` | Check a key works (uses the posted key if there is one, else the saved key) |
 | `GET /api/models/claude?refresh=1` | Live Claude model list, vision models only (cached 24h unless refresh) |

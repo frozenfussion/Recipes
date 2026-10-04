@@ -7,7 +7,7 @@ import {
 import { ApiError, friendlyAiError, logAiFailure } from '../lib/errors.js';
 import { decodeImage, decodePhotos, deleteImageFiles, detectImageType, saveImage } from '../lib/images.js';
 import { resolveModel } from '../lib/models.js';
-import { getSetting } from '../lib/settings.js';
+import { getApiKey, getSetting, noKeyMessage } from '../lib/settings.js';
 import {
   addMessage, createSession, deleteSession, duplicateSession, getSession, listSessions, setRecipe, updateSession,
 } from '../lib/sessions.js';
@@ -88,8 +88,8 @@ export function sessionsRouter(db, { ai, imagesDir, limiters }) {
     const id = parseId(req.params.id);
     const session = getSession(db, id);
     if (!session.recipe) throw new ApiError(400, 'no_recipe', 'This session has no recipe to make a picture of yet.');
-    const apiKey = getSetting(db, 'openai_api_key');
-    if (!apiKey) throw new ApiError(400, 'no_key', 'No OpenAI API key yet. Add one in Settings.');
+    const apiKey = getApiKey(db, 'openai_api_key');
+    if (!apiKey) throw new ApiError(400, 'no_key', noKeyMessage(db, 'OpenAI'));
     const model = await resolveModel(db, ai, 'openai');
     const quality = getSetting(db, 'image_quality') || 'low';
 

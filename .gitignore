@@ -4,6 +4,9 @@ node_modules/
 # local data: database, uploaded and generated images, API keys live in here
 data/
 
+# local backups made by npm run backup
+backups/
+
 # environment files
 .env
 .env.*

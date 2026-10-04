@@ -30,6 +30,7 @@ npm run dev     same as start, restarting when you change files in src/ or publi
 npm test        run the tests (they use fake AI services: no keys, no cost)
 npm run seed    add 5 demo recipes and 2 lists, so the screens have something to show
 npm run check:network   test whether this computer can reach Claude and OpenAI (sends no key)
+npm run backup  copy data/ into backups/<date-time>/ (keeps the newest 14)
 ```
 Optional: copy `.env.example` to `.env` to change `PORT` or `HOST`.
 
@@ -43,7 +44,7 @@ Optional: copy `.env.example` to `.env` to change `PORT` or `HOST`.
 | **Settings** | Keys, models, image quality, theme (light, dark or match your device) |
 
 ## Keeping your money and data safe
-- **Keys** are stored as plain text in `data/chefbuddy.db` on your computer (the `data/` folder is never committed). The browser only ever sees a masked version like `sk-ant-…a1b2`. This is fine for a single-user app on your own PC. Do not put this version on the internet.
+- **Keys** are stored as plain text in `data/chefbuddy.db` on your computer (the `data/` folder is never committed). The browser only ever sees a masked version like `sk-ant-…a1b2`. This is fine for a single-user app on your own PC. On a server, keys come from a protected file instead (see below).
 - **AI photos cost money** and only happen when you press the button: one picture per press, quality Low by default.
 - A built-in limit (30 AI requests a minute) stops a bug or a loop from burning your credit.
 - Chef Buddy can make mistakes. Check labels and allergens yourself. Halal, kosher and allergy handling is a best effort, not a guarantee.
@@ -73,4 +74,13 @@ Optional: copy `.env.example` to `.env` to change `PORT` or `HOST`.
 ## How it is built
 Express serves a JSON API and the static frontend. SQLite (Node's built-in `node:sqlite`) stores everything in `data/chefbuddy.db`. The frontend is plain ES modules; text from the AI or the user is only ever shown with `textContent`, never as HTML (a test enforces this). The server talks to Claude and OpenAI through their official SDKs, so the browser never holds a key. See [docs/specs/02-architecture.md](docs/specs/02-architecture.md) for the folder map and the API list.
 
-Later (not built yet): deployment to a server with a login, HTTPS and keys in environment variables.
+## Deploying to a server
+Chef Buddy runs at https://recipes.faysalaziz.com on an Ubuntu server: a systemd service on 127.0.0.1:3000, Caddy in front with automatic HTTPS and a login, a firewall that only lets in SSH, 80 and 443, API keys in a root-only file, and a nightly backup. The config files and the setup scripts are in [deploy/](deploy/). What we did and why, step by step: [docs/deploy-security.md](docs/deploy-security.md).
+
+Settings for a server (all optional; without them the app behaves as described above):
+| Setting | What it does |
+|---|---|
+| `ALLOWED_HOSTS` | Extra host names the app answers to, comma-separated, e.g. `recipes.faysalaziz.com` |
+| `KEY_SOURCE=server` | Keys only from `CHEF_BUDDY_ANTHROPIC_KEY` and `CHEF_BUDDY_OPENAI_KEY` in the environment, never from the database. The Settings page shows them as "Set on the server" |
+
+Updating the server: `git pull`, `npm ci --omit=dev`, `sudo systemctl restart chef-buddy`.

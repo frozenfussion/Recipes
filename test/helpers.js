@@ -7,10 +7,11 @@ import { createApp } from '../src/server.js';
 
 // A running app on a random port with an in-memory database, a temporary images folder
 // and fake AI services. Call close() when done. req(method, path, body) returns { status, body, text }.
-export async function startTestApp(ai = {}) {
+// options go to createApp, e.g. { serverKeys } to run it the way the server does.
+export async function startTestApp(ai = {}, options = {}) {
   const db = openDb(':memory:');
   const imagesDir = mkdtempSync(path.join(tmpdir(), 'chefbuddy-images-'));
-  const server = createApp(db, { ai, imagesDir }).listen(0, '127.0.0.1');
+  const server = createApp(db, { ai, imagesDir, ...options }).listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
 

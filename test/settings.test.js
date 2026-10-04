@@ -21,6 +21,7 @@ test('maskKey shows only the first 7 and last 4 characters', () => {
 test('fresh settings: no keys, defaults', async () => {
   const { body } = await app.req('GET', '/api/settings');
   assert.deepEqual(body, {
+    keysOnServer: false,
     claude: { hasKey: false, maskedKey: '', model: null },
     openai: { hasKey: false, maskedKey: '', model: null, quality: 'low' },
     theme: 'device',

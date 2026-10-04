@@ -1,7 +1,7 @@
 import { buildSystemPrompt } from '../ai/prompts.js';
 import { ApiError, friendlyAiError, logAiFailure } from './errors.js';
 import { validateRecipe } from './recipe.js';
-import { getSetting } from './settings.js';
+import { getApiKey, noKeyMessage } from './settings.js';
 import { resolveModel } from './models.js';
 
 // The glue between our routes and Claude: reading the user's input safely, picking the key and
@@ -65,8 +65,8 @@ export function parseRefine(body = {}) {
 
 // Key and model for a Claude request, with beginner-friendly errors.
 export async function claudeSettings(db, ai) {
-  const apiKey = getSetting(db, 'anthropic_api_key');
-  if (!apiKey) throw new ApiError(400, 'no_key', 'No Claude API key yet. Add one in Settings.');
+  const apiKey = getApiKey(db, 'anthropic_api_key');
+  if (!apiKey) throw new ApiError(400, 'no_key', noKeyMessage(db, 'Claude'));
   const model = await resolveModel(db, ai, 'claude');
   return { apiKey, model };
 }

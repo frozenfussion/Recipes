@@ -2,7 +2,7 @@
 
 ## Where keys live
 - The user types the Claude key and the OpenAI key on the Settings page.
-- The server stores them in the `settings` table of `data/chefbuddy.db`. The whole `data/` folder is git-ignored.
+- The server stores them in the `settings` table of `data/chefbuddy.db`. The whole `data/` folder is git-ignored. (On a server they come from a protected file instead; see the last section.)
 - Keys are stored as plain text in version 1 because the app runs on the user's own computer. This is a known trade-off. For a shared server (the later DigitalOcean phase) move keys to environment variables or an encrypted store, and add a login first.
 
 ## What the browser may see
@@ -33,5 +33,10 @@
 ## Privacy note to show on Settings
 "Your keys and recipes stay on this computer. Text and photos you send are processed by Anthropic (Claude) and, for AI photos, OpenAI, under their terms."
 
-## Before deploying anywhere public (future phase)
-Add login, HTTPS, move keys out of the database, per-user data, stricter rate limits, backups. Do not expose the current version to the internet.
+## On a server (KEY_SOURCE=server)
+- Deployed at https://recipes.faysalaziz.com behind Caddy (HTTPS and a basic-auth login). See `docs/deploy-security.md`.
+- Keys come only from `CHEF_BUDDY_ANTHROPIC_KEY` and `CHEF_BUDDY_OPENAI_KEY`, which systemd reads from the root-only file `/etc/chef-buddy/secrets.env`. They are read from the real environment only, never from `.env`.
+- The database is never asked for or given a key. `PUT /api/settings` with a key, `DELETE /api/settings/key/:provider` and a typed key on Test answer `400 keys_on_server`.
+- `GET /api/settings` adds `keysOnServer: true`; the Settings page shows "Set on the server" with the masked key and Test, without the key field, Save or Remove.
+- `ALLOWED_HOSTS` adds the public host name to the Host check. The Origin check is unchanged.
+- Not done (out of scope for the demo): per-user accounts and data.

@@ -1,9 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { parseEnv } from 'node:util';
 
-// PORT and HOST come from the real environment first, then from the .env file,
-// then from the defaults. API keys are NOT configured here: they are entered on
-// the Settings page.
+// PORT, HOST, ALLOWED_HOSTS and KEY_SOURCE come from the real environment first, then
+// from the .env file, then from the defaults. On your own PC, API keys are entered on the
+// Settings page. On a server (KEY_SOURCE=server) they come only from the real environment,
+// which systemd fills from a protected file (see docs/deploy-security.md).
 
 export class ConfigError extends Error {}
 
@@ -27,7 +28,28 @@ export function resolveConfig(fileValues = {}, env = process.env) {
   }
   // 127.0.0.1 means only this computer can open the app. Anything else is an explicit choice.
   const host = (env.HOST || fileValues.HOST || '127.0.0.1').trim();
-  return { port, host };
+
+  // Extra host names the app answers to, e.g. the public name behind Caddy. Empty on a PC.
+  const allowedHosts = String(env.ALLOWED_HOSTS || fileValues.ALLOWED_HOSTS || '')
+    .split(',').map((name) => name.trim().toLowerCase()).filter(Boolean);
+  for (const name of allowedHosts) {
+    if (!/^[a-z0-9.-]+$/.test(name)) {
+      throw new ConfigError(`ALLOWED_HOSTS must be host names separated by commas, but it has "${name}".`);
+    }
+  }
+
+  const keySource = (env.KEY_SOURCE || fileValues.KEY_SOURCE || 'app').trim();
+  if (!['app', 'server'].includes(keySource)) {
+    throw new ConfigError(`KEY_SOURCE must be "app" or "server", but it is "${keySource}".`);
+  }
+  // Keys are read from the real environment only, never from .env, so they never sit in the project folder.
+  const serverKeys = keySource === 'server'
+    ? {
+      anthropic_api_key: (env.CHEF_BUDDY_ANTHROPIC_KEY || '').trim() || null,
+      openai_api_key: (env.CHEF_BUDDY_OPENAI_KEY || '').trim() || null,
+    }
+    : null;
+  return { port, host, allowedHosts, serverKeys };
 }
 
 export function loadConfig(envFile) {

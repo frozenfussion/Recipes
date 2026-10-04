@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createAi } from './ai/index.js';
 import { ConfigError, loadConfig } from './config.js';
 import { openDb } from './db.js';
+import { useServerKeys } from './lib/settings.js';
 import { ApiError, sendError } from './lib/errors.js';
 import { createRateLimiter } from './lib/rate-limit.js';
 import { isLoopbackHost, requestGuard, securityHeaders } from './lib/security.js';
@@ -27,13 +28,17 @@ export function createApp(db, {
   ai = createAi(),
   imagesDir = path.join(root, 'data', 'images'),
   loopbackOnly = true,
+  allowedHosts = [],
+  // Set on a server: { anthropic_api_key, openai_api_key } from the environment. null = keys from Settings.
+  serverKeys = null,
   // Everything that costs money shares one gate (30 a minute), pictures get a tighter one (10 a minute).
   limiters = { ai: createRateLimiter({ limit: 30 }), image: createRateLimiter({ limit: 10 }) },
 } = {}) {
+  if (serverKeys) useServerKeys(db, serverKeys);
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
-  app.use(requestGuard({ loopbackOnly }));
+  app.use(requestGuard({ loopbackOnly, allowedHosts }));
 
   app.use('/api', (req, res, next) => (isPhotoRoute(req) ? photoJson : smallJson)(req, res, next));
   app.use('/api', healthRouter(db));
@@ -75,14 +80,22 @@ function start() {
   } catch (err) {
     fail(err instanceof ConfigError ? err.message : `Could not start: ${err.message}`);
   }
-  const { port, host } = config;
+  const { port, host, allowedHosts, serverKeys } = config;
 
-  const app = createApp(db, { imagesDir: path.join(dataDir, 'images'), loopbackOnly: isLoopbackHost(host) });
+  const app = createApp(db, {
+    imagesDir: path.join(dataDir, 'images'), loopbackOnly: isLoopbackHost(host), allowedHosts, serverKeys,
+  });
   const server = app.listen(port, host);
   server.once('listening', () => {
     console.log(`Chef Buddy is running at http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`);
     if (!isLoopbackHost(host)) {
       console.log('Heads up: other devices on your network can open this app. It has no login and it spends your API credit.');
+    }
+    if (allowedHosts.length) console.log(`Also answering to: ${allowedHosts.join(', ')}`);
+    if (serverKeys) {
+      // Say whether each key is there, never the key itself.
+      const state = (key) => (key ? 'set' : 'NOT set');
+      console.log(`API keys come from the server: Claude ${state(serverKeys.anthropic_api_key)}, OpenAI ${state(serverKeys.openai_api_key)}.`);
     }
   });
   // Ctrl+C: stop listening and close the database cleanly.
