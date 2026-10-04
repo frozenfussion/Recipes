@@ -1,0 +1,52 @@
+/* Design tokens for design A, "Stone Age Diner". Colours come from here only.
+   Light is the default. Dark is applied by data-theme="dark", or by the device
+   setting when the user has not chosen (no data-theme attribute at all). */
+:root {
+  --bg: #ffe3a3;
+  --card: #fff6dc;
+  --ink: #2b1a0f;
+  --muted: #7a5a3a;
+  --primary: #e8541e;
+  --on-primary: #ffffff;
+  --accent: #2f9e9a;
+  --on-accent: #ffffff;
+  --pop: #ffc93c;
+  --on-pop: #2b1a0f;
+  --line: #2b1a0f;
+  --danger: #d6342c;
+  --on-danger: #ffffff;
+  --scrim: rgba(0, 0, 0, 0.55);
+
+  --radius: 18px;
+  --shadow: 6px 6px 0 var(--line);
+
+  --font-head: 'Bangers', Impact, sans-serif;
+  --font-body: 'Nunito', system-ui, sans-serif;
+  --head-spacing: 1.5px;
+}
+
+:root[data-theme="dark"] {
+  --bg: #1f140d;
+  --card: #35231a;
+  --ink: #ffe9c7;
+  --muted: #c9a67c;
+  --primary: #ff7a3d;
+  --on-primary: #1f140d;
+  --accent: #4fd1c5;
+  --on-accent: #10231f;
+  --line: #0c0705;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #1f140d;
+    --card: #35231a;
+    --ink: #ffe9c7;
+    --muted: #c9a67c;
+    --primary: #ff7a3d;
+    --on-primary: #1f140d;
+    --accent: #4fd1c5;
+    --on-accent: #10231f;
+    --line: #0c0705;
+  }
+}
