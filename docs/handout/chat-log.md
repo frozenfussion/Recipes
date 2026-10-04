@@ -54,3 +54,10 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - Aziz: the design "looks good" (design A shown).
 - **Handout must teach recursive refinement:** do not accept the first thing the AI generates. Review it, understand all of it, ask for changes, and repeat.
 - Next: write CLAUDE.md, the spec files and a downloadable starter package. No app code yet.
+
+## Session 1 – Starter package written
+- Aziz confirmed: **design A is final**; the work must live on **main**; give Git CLI commands.
+- Written and committed: `CLAUDE.md`, `START-HERE.md` (Windows install, clone/sync commands, first prompt, phase routine, everyday Git), `README.md`, `.gitignore`, `.env.example`, `assets/` (logo, favicon), `docs/specs/01..08`, `mockups/` (+ `screens/`).
+- Specs verified against vendor docs on 2026-10-04: Claude `/v1/models` (capabilities.image_input), image input rules (base64, 10 MB, resize to 1568px), streaming SDK helper, Claude Code Windows install, OpenAI image models (`gpt-image-2.5-*`, base64 response, sizes, quality).
+- Build plan: Phase 0 skeleton, 1 design system and shell, 2 settings and live model lists, 3 data layer and lists, 4 recipes/chat/refine, 5 photos and "I cooked it", 6 AI photo, 7 polish. Each phase: plan, build, run, explain, challenge, commit.
+- Deliverable zip: `chef-buddy-starter.zip` (sent to Aziz in chat).

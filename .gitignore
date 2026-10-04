@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# local data: database, uploaded and generated images, API keys live in here
+data/
+
+# environment files
+.env
+.env.*
+!.env.example
+
+# logs and OS junk
+*.log
+.DS_Store
+Thumbs.db
+
+# Claude Code local-only settings
+.claude/settings.local.json
