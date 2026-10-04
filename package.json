@@ -1,0 +1,18 @@
+{
+  "name": "chef-buddy",
+  "version": "0.1.0",
+  "description": "A cartoon-style recipe helper powered by Claude.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch-path=src --watch-path=public src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
