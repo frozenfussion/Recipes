@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Chef Buddy</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <!-- Blocking on purpose: applies the saved theme before the first paint, so there is no flash. -->
+  <script src="/js/theme-init.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <img class="logo" src="/assets/logo.svg" alt="" width="56" height="56">
+      <div class="title"><h1>Chef Buddy</h1><small>What's in your fridge today?</small></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch between light and dark theme">🌙 / ☀️</button>
+    </header>
+    <main id="screen" tabindex="-1"></main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <nav class="tabs" aria-label="Main">
+    <button type="button" data-screen="home"><span class="ic" aria-hidden="true">🧑‍🍳</span>Cook</button>
+    <button type="button" data-screen="recipe"><span class="ic" aria-hidden="true">📖</span>Recipe</button>
+    <button type="button" data-screen="history"><span class="ic" aria-hidden="true">🕘</span>History</button>
+    <button type="button" data-screen="saved"><span class="ic" aria-hidden="true">⭐</span>My Recipes</button>
+    <button type="button" data-screen="settings"><span class="ic" aria-hidden="true">⚙️</span>Settings</button>
+  </nav>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

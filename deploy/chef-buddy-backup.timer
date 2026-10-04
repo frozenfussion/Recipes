@@ -1,0 +1,12 @@
+# Runs the backup every night at about 03:30 (server time). Persistent=true means a backup
+# that was missed because the server was off runs as soon as it is back on.
+[Unit]
+Description=Nightly Chef Buddy backup
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

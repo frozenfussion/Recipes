@@ -1,0 +1,23 @@
+{
+  "name": "chef-buddy",
+  "version": "0.1.0",
+  "description": "A cartoon-style recipe helper powered by Claude.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning src/server.js",
+    "dev": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --watch-path=src --watch-path=public src/server.js",
+    "test": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --test",
+    "check:network": "node scripts/check-node.js && node scripts/check-network.js",
+    "seed":"node scripts/check-node.js && node --disable-warning=ExperimentalWarning scripts/seed.js",
+    "backup": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning scripts/backup.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "express": "^5.1.0",
+    "openai": "^7.27.0"
+  }
+}

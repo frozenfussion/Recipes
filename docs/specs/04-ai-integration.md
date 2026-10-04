@@ -17,16 +17,18 @@ Official `@anthropic-ai/sdk`, created per request from the key saved in Settings
 - First run with no saved model: preselect the newest model that supports images and is not obviously the most expensive tier. Let the user change it. Say in the UI which one was auto-picked.
 
 ### Recipe generation (structured output)
-Use **tool use** to get reliable JSON: define a tool `submit_recipe` whose `input_schema` matches the recipe JSON in `03-data-model.md`, and force it with `tool_choice: { "type": "tool", "name": "submit_recipe" }`. Validate the result on the server (types, array lengths, string lengths) before saving. If validation fails, retry once, then show a friendly error.
+Use **tool use** to get reliable JSON: define a tool `submit_recipe` whose `input_schema` matches the recipe JSON in `03-data-model.md` (plus an optional `detected_ingredients` list for photos). Validate the result on the server (types, array lengths, string lengths) before saving. If validation fails, or Claude did not call the tool, retry once (telling Claude what was wrong), then show a friendly error.
+
+**Built differently from the first draft of this spec:** the tool is **not forced** with `tool_choice: { "type": "tool" }`. The newest Claude models (Opus 5.5, Sonnet 5.5, Fable 5.1 at the time of writing) reject forced tool use with a 400, and the user can pick any model from the live list. So the request uses `tool_choice: { "type": "auto" }`, the system prompt says "answer by calling submit_recipe exactly once", and the validate-and-retry step above covers the rare miss. The same models always think before answering and use `max_tokens` for that too, so recipe requests use a generous `max_tokens` (16000) and the SDK is called non-streaming. A `refusal` stop reason is shown as a friendly message.
 
 The user message contains: diets, allergies, cuisine, servings, time, spice, typed ingredients, free text ("I want to make..."), and zero to four photos.
 
 ### Photos in (fridge)
 - Content block: `{ "type": "image", "source": { "type": "base64", "media_type": "image/jpeg", "data": "..." } }`, placed **before** the text.
-- Formats: JPEG, PNG, GIF, WebP. Max 10 MB per image (base64) on the direct API; request size limit 32 MB.
+- Formats Claude accepts: JPEG, PNG, GIF, WebP. Max 10 MB per image (base64) on the direct API; request size limit 32 MB. **Our server accepts JPEG, PNG and WebP only** (type checked from the file's first bytes), at most 8 MB each.
 - Phone photos are huge. **Resize in the browser** with a canvas to at most 1568 px on the long edge, export JPEG at about 0.85 quality, before upload. This keeps requests small and cheap and is plenty for ingredients.
 - Max 4 photos per request. Label them in text ("Image 1:", "Image 2:").
-- When photos are present, the prompt asks Claude to list the ingredients it can see, say how sure it is, and use only what is reasonable. The UI should show the detected ingredient list so the user can correct it (Claude can misidentify items).
+- When photos are present, the prompt asks Claude to list the ingredients it can see, say how sure it is, and use only what is reasonable. The UI shows the detected ingredient list on the recipe ("Chef Buddy spotted in your photo: ...") so the user can correct it by telling Chef Buddy in the chat (Claude can misidentify items). It is stored in the recipe JSON as `detected_ingredients`.
 - Images are not stored by Anthropic after the request; we store our own copy in `data/images/` with kind `fridge`.
 
 ### Chat (streaming)
@@ -50,6 +52,9 @@ Persona: a friendly, practical home-cooking assistant called Chef Buddy. Rules t
 - Keep chat answers short and practical. Offer substitutions when the user cannot find an ingredient.
 - Never invent that a photo shows something it does not. Say when unsure.
 
+### Timeouts
+The SDKs wait 10 minutes by default and retry, so a stalled connection looks like a spinner that never stops. Every call sets its own limit (`src/ai/timeouts.js`): 15 seconds and no retry for model lists and key tests, 3 minutes for a recipe, 2 minutes for the start of a chat answer or a picture. The browser has its own limits too (25 seconds on Settings, 60 seconds normally, 4 minutes for recipes and pictures). A timeout is shown as "... did not answer in time. Check your internet connection (a VPN, proxy or firewall can block it)". The server prints one safe line per failure (error class, HTTP status, network code, never the message or the key), and `npm run check:network` tests DNS, the connection and a request for both vendors.
+
 ### Errors to map to friendly messages
 Missing key, 401 (bad key), 429 (rate limit, try again shortly), 529 or 5xx (service busy), model not found (go to Settings), request too large (photo too big), network failure.
 
@@ -65,12 +70,13 @@ At the time of writing, the docs list `gpt-image-2.5-flare` (fast, everyday) and
 ### Generation
 - `POST /v1/images/generations` (SDK: `client.images.generate`). Body: `model`, `prompt`, `size`, `quality`, `n: 1`.
 - Recommended sizes: `1024x1024`, `1536x1024` (landscape, use this for the recipe photo), `1024x1536`.
-- Quality: `low`, `medium`, `high`, `xhigh`, `max`, `auto`. Default setting is `low` (cheapest). Let the user change it in Settings.
+- Quality: `low`, `medium`, `high`, `xhigh`, `max`, `auto` exist at the API. Default setting is `low` (cheapest). Settings offers Low, Medium and High.
 - The response is base64 (`data[0].b64_json`). Decode, save as a file in `data/images/` with kind `ai`, never hot-link.
 - Prompt template (built in code, not by the user): "A natural, appetising photo of <title>, home-cooked, served on a plate, soft daylight, no text, no people." Keep the dish name and main ingredients; avoid brand names.
-- Only on button press (**AI photo**). Show a spinner and a "this uses your OpenAI credit" hint the first time. One image per press.
+- Only on button press (**AI photo**, or **Try again** on an AI picture). Show a spinner and a "this uses your OpenAI credit" dialog the first time. One image per press. A new AI picture replaces the old one (only the newest is kept). The user's own photo always wins over the AI one.
 - Label every generated image "AI-generated · what it might look like".
-- Errors: missing key, 401, 429, content policy refusal (say "The image service declined this one, try again or add your own photo."), network.
+- Errors: missing key, 401, 429, content policy refusal (the API error code is `moderation_blocked`; say "The image service declined this one. Try again or add your own photo."), network.
+- The prompt keeps the first four ingredients with the amounts stripped ("400 g chicken thighs" becomes "chicken thighs").
 
 ## Never
 - Never send or log API keys. Never send the whole database to any API.

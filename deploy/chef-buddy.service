@@ -1,0 +1,40 @@
+# Chef Buddy as a systemd service: starts on boot, restarts if it crashes, runs as the
+# normal user (not root) and only listens on 127.0.0.1. Caddy is the only way in from outside.
+# Installed to /etc/systemd/system/ by deploy/install-app.sh. See docs/deploy-security.md.
+[Unit]
+Description=Chef Buddy recipe app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=aziz
+Group=aziz
+WorkingDirectory=/home/aziz/projects/recipes
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning src/server.js
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+Environment=ALLOWED_HOSTS=recipes.faysalaziz.com
+# API keys: only from the environment, never from the database or the Settings page.
+Environment=KEY_SOURCE=server
+# systemd reads this file as root (mode 600) before starting the app, and passes the keys in.
+# The app user cannot open the file itself. The "-" means: start anyway if it does not exist yet.
+EnvironmentFile=-/etc/chef-buddy/secrets.env
+Restart=on-failure
+RestartSec=5
+
+# Hardening: even if the app were tricked into running something, it can only write to data/.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/aziz/projects/recipes/data
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+# Keep line endings the same on every computer. Files are LF in the repo and in
+# the working folder, which Node, npm and every editor handle fine on Windows.
+* text=auto eol=lf
+
+# Never touch binary files.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary

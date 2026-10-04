@@ -46,6 +46,8 @@ Recipe JSON (`recipe` column):
 ```
 `shopping_list` is what the user still needs to buy (used for "I want to make X"). The UI shows it only when it is not empty.
 
+One optional extra: `detected_ingredients` (a list of strings) is present only when Claude read fridge photos. It is kept when the recipe is refined. Limits checked by the server: title 120 characters, up to 60 ingredients (200 each), up to 60 steps (1000 each), up to 12 tags, notes 500.
+
 ### `messages`
 | id | INTEGER PK | |
 | session_id | INTEGER NOT NULL | FK ON DELETE CASCADE |
@@ -61,12 +63,14 @@ Recipe JSON (`recipe` column):
 | mime | TEXT NOT NULL | `image/jpeg`, `image/png`, `image/webp` |
 | created_at | TEXT | |
 
-A session shows at most one dish photo: the newest `cooked` photo wins over the newest `ai` photo.
+A session shows at most one dish photo: the newest `cooked` photo wins over the newest `ai` photo. To save disk space, a new `cooked` photo replaces the old `cooked` one (row and file), and a new `ai` picture replaces the old `ai` one. `fridge` photos are kept as our own copy and never shown.
 
 ## Rules
 - Deleting a session deletes its messages, its image rows **and the files** on disk.
 - Deleting a list sets `list_id` to NULL on its sessions. The recipes stay.
 - Setting a list on a draft session also saves it (status `saved`).
-- Duplicating copies the recipe JSON, sets title to "<title> (copy)", status `saved`, no photo, a fresh chat with one `note` message, and `duplicated_from`.
+- Duplicating copies the recipe JSON, sets title to "<title> (copy)", status `saved`, no photo, a fresh chat with one `note` message, and `duplicated_from`. The copy stays in the same list.
+- Taking a recipe out of a list does not change its status (a saved recipe stays saved).
+- Each migration runs in a transaction, so a failed one leaves nothing half-made. Version numbers: 1 bookkeeping, 2 settings, 3 lists + sessions + messages + images.
 - Search (`q`) matches title and ingredients, case-insensitive.
 - Image files: random file names, saved only under `data/images/`, type checked by content not just extension, size limit 8 MB.
