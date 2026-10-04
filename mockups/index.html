@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en" data-dir="a" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipe App – Design Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Lilita+One&family=Nunito:wght@500;700;800&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ---------- Direction A: "Stone Age Diner" ---------- */
+:root[data-dir="a"][data-theme="light"]{
+  --bg:#ffe3a3; --card:#fff6dc; --ink:#2b1a0f; --muted:#7a5a3a;
+  --primary:#e8541e; --on-primary:#fff; --accent:#2f9e9a; --on-accent:#fff; --pop:#ffc93c;
+  --line:#2b1a0f; --radius:18px; --shadow:6px 6px 0 var(--line);
+  --font-head:'Bangers',Impact,sans-serif; --font-body:'Nunito',system-ui,sans-serif; --head-spacing:1.5px;
+}
+:root[data-dir="a"][data-theme="dark"]{
+  --bg:#1f140d; --card:#35231a; --ink:#ffe9c7; --muted:#c9a67c;
+  --primary:#ff7a3d; --on-primary:#1f140d; --accent:#4fd1c5; --on-accent:#10231f; --pop:#ffc93c;
+  --line:#0c0705; --radius:18px; --shadow:6px 6px 0 var(--line);
+  --font-head:'Bangers',Impact,sans-serif; --font-body:'Nunito',system-ui,sans-serif; --head-spacing:1.5px;
+}
+/* ---------- Direction B: "Space Age Kitchen" ---------- */
+:root[data-dir="b"][data-theme="light"]{
+  --bg:#d4f1ee; --card:#ffffff; --ink:#13303a; --muted:#4f7480;
+  --primary:#ff4f8b; --on-primary:#fff; --accent:#1fa7b8; --on-accent:#fff; --pop:#ffc93c;
+  --line:#13303a; --radius:30px; --shadow:5px 5px 0 var(--line);
+  --font-head:'Lilita One',system-ui,sans-serif; --font-body:'Quicksand',system-ui,sans-serif; --head-spacing:.5px;
+}
+:root[data-dir="b"][data-theme="dark"]{
+  --bg:#0e1f2c; --card:#17384a; --ink:#e6f7fb; --muted:#8fb8c6;
+  --primary:#ff6fa3; --on-primary:#2a0716; --accent:#3dd6e4; --on-accent:#062a30; --pop:#ffd24d;
+  --line:#050d14; --radius:30px; --shadow:5px 5px 0 var(--line);
+  --font-head:'Lilita One',system-ui,sans-serif; --font-body:'Quicksand',system-ui,sans-serif; --head-spacing:.5px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-weight:600;line-height:1.45;min-height:100vh;padding-bottom:84px}
+h1,h2,h3{font-family:var(--font-head);letter-spacing:var(--head-spacing);font-weight:400;margin:0 0 .4em}
+h1{font-size:2.2rem} h2{font-size:1.7rem} h3{font-size:1.25rem}
+button,input,select,textarea{font:inherit;color:inherit}
+
+/* mockup control bar */
+.ctl{background:#111;color:#fff;font:600 13px system-ui,sans-serif;display:flex;flex-wrap:wrap;gap:8px 16px;padding:8px 12px;align-items:center;justify-content:center}
+.ctl b{opacity:.7;font-weight:600}
+.ctl button{background:#333;color:#fff;border:1px solid #555;border-radius:6px;padding:4px 10px;cursor:pointer}
+.ctl button[aria-pressed="true"]{background:#fff;color:#111}
+
+/* app shell */
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+header.top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.logo{width:56px;height:56px;flex:none}
+header.top .title{flex:1}
+header.top .title h1{margin:0;line-height:1;color:var(--primary);text-shadow:2px 2px 0 var(--line)}
+header.top .title small{color:var(--muted)}
+.theme-btn{border:3px solid var(--line);background:var(--card);border-radius:999px;padding:8px 12px;cursor:pointer;box-shadow:3px 3px 0 var(--line);font-weight:800}
+
+.card{background:var(--card);border:4px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:20px}
+.grid{display:grid;gap:20px}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
+
+label.lbl{display:block;font-weight:800;margin:10px 0 6px}
+.field,textarea{width:100%;border:3px solid var(--line);border-radius:calc(var(--radius) - 6px);padding:10px 12px;background:var(--bg);outline:none}
+.field:focus,textarea:focus{box-shadow:0 0 0 4px var(--pop)}
+textarea{min-height:84px;resize:vertical}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:3px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;font-weight:800;cursor:pointer;user-select:none}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.chip.rm{background:var(--pop);color:#2b1a0f}
+details.more{margin-top:10px}
+details.more summary{cursor:pointer;font-weight:800;color:var(--primary)}
+.group-title{font-size:.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:10px 0 4px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border:4px solid var(--line);background:var(--primary);color:var(--on-primary);border-radius:999px;padding:10px 20px;font-family:var(--font-head);letter-spacing:var(--head-spacing);font-size:1.2rem;cursor:pointer;box-shadow:4px 4px 0 var(--line)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--line)}
+.btn.alt{background:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.btn.big{width:100%;justify-content:center;font-size:1.5rem}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.drop{border:3px dashed var(--line);border-radius:var(--radius);padding:18px;text-align:center;background:var(--bg)}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto;padding:4px}
+.msg{max-width:86%;padding:10px 14px;border:3px solid var(--line);border-radius:var(--radius)}
+.msg.me{align-self:flex-end;background:var(--accent);color:var(--on-accent);border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--bg);border-bottom-left-radius:4px}
+.sendrow{display:flex;gap:8px;margin-top:12px}
+.sendrow .field{flex:1}
+
+/* recipe */
+.photo{aspect-ratio:16/10;border:4px solid var(--line);border-radius:var(--radius);background:repeating-linear-gradient(45deg,var(--pop) 0 14px,var(--bg) 14px 28px);display:flex;align-items:flex-end;justify-content:space-between;padding:10px;font-weight:800}
+.badge{background:var(--card);border:3px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem}
+ul.ing,ol.steps{padding-left:1.2em;margin:.3em 0}
+ul.ing li::marker{color:var(--primary)} ol.steps li::marker{color:var(--primary);font-weight:800}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.small{font-size:.85rem;color:var(--muted)}
+
+/* lists */
+.rcard{display:flex;gap:12px;align-items:center}
+.thumb{width:64px;height:64px;flex:none;border:3px solid var(--line);border-radius:14px;background:var(--pop);display:grid;place-items:center;font-size:1.8rem}
+
+/* settings */
+.keyrow{display:flex;gap:8px}
+.keyrow .field{flex:1}
+.status{display:inline-block;border:3px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem;background:var(--pop);color:#2b1a0f}
+.warn{border:3px solid var(--line);background:var(--pop);color:#2b1a0f;border-radius:12px;padding:8px 12px;margin-top:8px;font-size:.9rem}
+
+/* screens + nav */
+.screen{display:none}.screen.on{display:block}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:4px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px;z-index:5}
+nav.tabs button{background:none;border:3px solid transparent;border-radius:999px;padding:6px 12px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;font-size:.8rem}
+nav.tabs button .ic{font-size:1.4rem;line-height:1}
+nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-primary);border-color:var(--line)}
+</style>
+</head>
+<body>
+
+<div class="ctl" aria-label="Mockup controls">
+  <b>Design:</b>
+  <button data-set-dir="a" aria-pressed="true">A · Stone Age Diner</button>
+  <button data-set-dir="b" aria-pressed="false">B · Space Age Kitchen</button>
+  <b>Theme:</b>
+  <button data-set-theme="light" aria-pressed="true">Light</button>
+  <button data-set-theme="dark" aria-pressed="false">Dark</button>
+</div>
+
+<div class="wrap">
+  <header class="top">
+    <!-- simple chef mascot -->
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="38" r="20" fill="var(--pop)" stroke="var(--line)" stroke-width="4"/>
+      <path d="M16 26c-6-2-6-14 3-14 2-6 12-8 15-2 7-3 14 4 10 11-2 3-5 4-8 4H22c-3 0-5-1-6-3z" fill="#fff" stroke="var(--line)" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="25" cy="38" r="3.5" fill="var(--line)"/><circle cx="39" cy="38" r="3.5" fill="var(--line)"/>
+      <path d="M24 47c5 6 11 6 16 0" fill="none" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div class="title"><h1>Chef Buddy</h1><small>What's in your fridge today?</small></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle light/dark theme">🌙 / ☀️</button>
+  </header>
+
+  <!-- ===== HOME ===== -->
+  <section class="screen on" id="s-home">
+    <div class="grid two">
+      <div class="card">
+        <h2>1 · Pick your diet</h2>
+        <div class="group-title">Diets &amp; lifestyle</div>
+        <div class="chips" data-chips>
+          <span class="chip" role="button" aria-pressed="true">Halal</span><span class="chip" role="button" aria-pressed="false">Kosher</span>
+          <span class="chip" role="button" aria-pressed="false">Vegetarian</span><span class="chip" role="button" aria-pressed="false">Vegan</span>
+          <span class="chip" role="button" aria-pressed="false">Pescatarian</span><span class="chip" role="button" aria-pressed="false">Meat-heavy</span>
+          <span class="chip" role="button" aria-pressed="false">Keto</span><span class="chip" role="button" aria-pressed="false">Low-carb</span>
+          <span class="chip" role="button" aria-pressed="false">Paleo</span><span class="chip" role="button" aria-pressed="false">Mediterranean</span>
+          <span class="chip" role="button" aria-pressed="false">High-protein</span><span class="chip" role="button" aria-pressed="false">Low-fat</span>
+        </div>
+        <details class="more" open>
+          <summary>Allergies &amp; intolerances</summary>
+          <div class="chips" data-chips style="margin-top:8px">
+            <span class="chip" role="button" aria-pressed="false">Gluten-free</span><span class="chip" role="button" aria-pressed="true">Nut-free</span>
+            <span class="chip" role="button" aria-pressed="false">Dairy-free</span><span class="chip" role="button" aria-pressed="false">Egg-free</span>
+            <span class="chip" role="button" aria-pressed="false">Shellfish-free</span><span class="chip" role="button" aria-pressed="false">Soy-free</span>
+            <span class="chip" role="button" aria-pressed="false">Sesame-free</span><span class="chip" role="button" aria-pressed="false">Lactose-free</span>
+          </div>
+        </details>
+        <details class="more">
+          <summary>More options</summary>
+          <div class="chips" data-chips style="margin-top:8px">
+            <span class="chip" role="button" aria-pressed="false">Low-sodium</span><span class="chip" role="button" aria-pressed="false">Low-sugar</span>
+            <span class="chip" role="button" aria-pressed="false">Diabetic-friendly</span>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <select class="field" style="width:auto"><option>Any cuisine</option><option>Italian</option><option>Indian</option><option>Middle Eastern</option></select>
+            <select class="field" style="width:auto"><option>Servings: 2</option><option>Servings: 4</option></select>
+            <select class="field" style="width:auto"><option>Time: 30 min</option><option>Time: 60 min</option></select>
+            <select class="field" style="width:auto"><option>Mild</option><option>Medium</option><option>Hot</option></select>
+          </div>
+        </details>
+      </div>
+
+      <div class="card">
+        <h2>2 · What have you got?</h2>
+        <label class="lbl" for="ing">Ingredients in the fridge</label>
+        <div class="chips" style="margin-bottom:8px">
+          <span class="chip rm">Chicken thighs ✕</span><span class="chip rm">Rice ✕</span><span class="chip rm">Yoghurt ✕</span><span class="chip rm">Spinach ✕</span>
+        </div>
+        <input class="field" id="ing" placeholder="Type an ingredient and press Enter…">
+        <div class="drop" style="margin-top:12px">📷 <b>Snap or upload a photo</b><br><span class="small">Chef Buddy will spot the ingredients for you</span></div>
+        <label class="lbl" for="want">…or tell me what you fancy</label>
+        <textarea id="want" placeholder="e.g. I want to make chicken biryani. What do I need to buy?"></textarea>
+        <div style="margin-top:14px"><button class="btn big" data-go="recipe">🍳 Cook something up!</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RECIPE + CHAT ===== -->
+  <section class="screen" id="s-recipe">
+    <div class="grid two">
+      <div class="card">
+        <div class="photo"><span class="badge">AI-generated · what it might look like</span><button class="btn alt" style="font-size:1rem;padding:6px 14px">🎨 New photo</button></div>
+        <h2 style="margin-top:14px">Garlicky Chicken &amp; Spinach Rice</h2>
+        <div class="meta"><span class="badge">⏱ 35 min</span><span class="badge">🍽 2 servings</span><span class="badge">Halal</span><span class="badge">Nut-free</span></div>
+        <h3>You'll need</h3>
+        <ul class="ing"><li>400 g chicken thighs</li><li>1 cup basmati rice</li><li>150 g spinach</li><li>½ cup yoghurt</li><li>3 cloves garlic</li></ul>
+        <h3>Method</h3>
+        <ol class="steps"><li>Marinate the chicken in yoghurt and garlic for 10 minutes.</li><li>Sear the chicken until golden, about 5 minutes per side.</li><li>Add rice and 2 cups water, cover and simmer 12 minutes.</li><li>Fold in the spinach and rest for 5 minutes.</li></ol>
+        <div class="row" style="margin-top:12px"><button class="btn">💾 Save recipe</button><button class="btn ghost">📋 Add to list</button></div>
+      </div>
+      <div class="card">
+        <h2>Ask Chef Buddy</h2>
+        <div class="chat">
+          <div class="msg ai">Here's a recipe from what's in your fridge! Shout if you hit a snag. 👨‍🍳</div>
+          <div class="msg me">The shop only had Greek yoghurt. Is that OK?</div>
+          <div class="msg ai">Perfect, even better. It's thicker, so loosen it with a splash of water.</div>
+          <div class="msg me">The rice is sticking to the pan!</div>
+          <div class="msg ai">Lower the heat and add a splash of hot water. Don't stir; just cover and wait.</div>
+        </div>
+        <div class="sendrow"><input class="field" placeholder="Ask a question…"><button class="btn">Send</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MY RECIPES ===== -->
+  <section class="screen" id="s-saved">
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><h2 style="margin:0">My Recipes</h2><button class="btn alt">＋ New list</button></div>
+      <div class="chips" style="margin:12px 0"><span class="chip" role="button" aria-pressed="true">All</span><span class="chip" role="button" aria-pressed="false">Weeknight</span><span class="chip" role="button" aria-pressed="false">Family favourites</span></div>
+      <input class="field" placeholder="🔍 Search recipes…">
+    </div>
+    <div class="grid two">
+      <div class="card rcard"><div class="thumb">🍛</div><div><h3 style="margin:0">Chicken Biryani</h3><span class="small">Halal · 60 min · Weeknight</span></div></div>
+      <div class="card rcard"><div class="thumb">🥗</div><div><h3 style="margin:0">Chickpea Salad Bowl</h3><span class="small">Vegan · 15 min · Family favourites</span></div></div>
+      <div class="card rcard"><div class="thumb">🍝</div><div><h3 style="margin:0">Garlic Prawn Linguine</h3><span class="small">Pescatarian · 25 min</span></div></div>
+      <div class="card rcard"><div class="thumb">🥘</div><div><h3 style="margin:0">Spinach &amp; Chicken Rice</h3><span class="small">Halal · 35 min · Weeknight</span></div></div>
+    </div>
+  </section>
+
+  <!-- ===== SETTINGS ===== -->
+  <section class="screen" id="s-settings">
+    <div class="grid two">
+      <div class="card">
+        <h2>Claude (the chef brain)</h2>
+        <label class="lbl">API key</label>
+        <div class="keyrow"><input class="field" type="password" value="sk-ant-••••••••••••••••"><button class="btn alt" style="font-size:1rem;padding:6px 14px">Test</button></div>
+        <label class="lbl">Model</label>
+        <div class="keyrow"><select class="field"><option>Claude Sonnet 5.5</option><option>Claude Opus 5.5</option><option>Claude Haiku 4.5</option></select><button class="btn ghost" style="font-size:1rem;padding:6px 14px">↻ Refresh</button></div>
+        <p class="small">✔ Live list from Anthropic · only models that can read photos are shown · last updated just now</p>
+        <span class="status">Key OK</span>
+      </div>
+      <div class="card">
+        <h2>OpenAI (the photographer)</h2>
+        <label class="lbl">API key</label>
+        <div class="keyrow"><input class="field" type="password" value="sk-••••••••••••••••••••"><button class="btn alt" style="font-size:1rem;padding:6px 14px">Test</button></div>
+        <label class="lbl">Image model</label>
+        <div class="keyrow"><select class="field"><option>gpt-image-2.5-flare</option><option>gpt-image-2.5-sunburst</option></select><button class="btn ghost" style="font-size:1rem;padding:6px 14px">↻ Refresh</button></div>
+        <label class="lbl">Image quality</label>
+        <select class="field"><option>Low (cheapest)</option><option>Medium</option><option>High</option></select>
+        <div class="warn">⚠ This model is retiring soon. Pick a new one.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Look &amp; feel</h2>
+      <div class="chips"><span class="chip" role="button" aria-pressed="false">☀️ Light</span><span class="chip" role="button" aria-pressed="false">🌙 Dark</span><span class="chip" role="button" aria-pressed="true">🖥 Match my device</span></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Main">
+  <button data-screen="home" aria-current="page"><span class="ic">🧑‍🍳</span>Cook</button>
+  <button data-screen="recipe"><span class="ic">📖</span>Recipe</button>
+  <button data-screen="saved"><span class="ic">⭐</span>My Recipes</button>
+  <button data-screen="settings"><span class="ic">⚙️</span>Settings</button>
+</nav>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}}
+  function setDir(d){root.dataset.dir=d;store('mock-dir',d);
+    document.querySelectorAll('[data-set-dir]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.setDir===d)})}
+  function setTheme(t){root.dataset.theme=t;store('mock-theme',t);
+    document.querySelectorAll('[data-set-theme]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.setTheme===t)})}
+  function show(s){
+    document.querySelectorAll('.screen').forEach(function(e){e.classList.toggle('on',e.id==='s-'+s)});
+    document.querySelectorAll('nav.tabs button').forEach(function(b){
+      if(b.dataset.screen===s)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+    if(location.hash!=='#'+s)history.replaceState(null,'','#'+s);
+  }
+  var q=new URLSearchParams(location.search);
+  var prefersDark=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;
+  setDir(q.get('dir')||store('mock-dir')||'a');
+  setTheme(q.get('theme')||store('mock-theme')||(prefersDark?'dark':'light'));
+  show((location.hash||'#home').slice(1));
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('button,.chip');if(!t)return;
+    if(t.dataset.setDir)setDir(t.dataset.setDir);
+    else if(t.dataset.setTheme)setTheme(t.dataset.setTheme);
+    else if(t.id==='themeBtn')setTheme(root.dataset.theme==='dark'?'light':'dark');
+    else if(t.dataset.screen)show(t.dataset.screen);
+    else if(t.dataset.go)show(t.dataset.go);
+    else if(t.classList.contains('chip')&&t.hasAttribute('aria-pressed')){
+      var grp=t.parentElement;
+      if(grp.hasAttribute('data-chips'))t.setAttribute('aria-pressed',t.getAttribute('aria-pressed')!=='true');
+    }
+  });
+})();
+</script>
+</body>
+</html>
