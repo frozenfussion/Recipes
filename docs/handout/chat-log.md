@@ -160,3 +160,8 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - `16-ai-photo-generated.png`: the OpenAI image on the recipe, labelled "AI-generated · what it might look like", with **Try again** and **Change photo** buttons.
 - `17-recipe-actions-and-chat.png`: the lower half of the recipe screen: method, a cooking tip, the "Check labels and allergens yourself" note, buttons (I cooked it!, Add to list, Edit, Delete) and the chat ("Ask Chef Buddy") with the user's message and Claude's reply.
 - Aziz: "looks absolutely beautiful." The full journey now works with real keys: diet and ingredients, recipe, chat, AI photo.
+
+## Session 1 – "Press Save key first" fix and repo check (screenshots 18, 19, 20)
+- `18-claude-code-save-key-fix.png`: commit `f08c5df`. Typing a key shows "Not saved yet"; Refresh and Test with an unsaved key say "Press Save key first"; with no key they say "Add your Anthropic key and press Save key first". 119 tests pass, and Claude Code checked it in a real browser.
+- `19-history-screen-real.png` and `20-my-recipes-screen-real.png`: the real History and My Recipes screens after the first recipe was saved (photo thumbnail, "Saved" badge, tags).
+- **Independent repo check** (fresh clone of `main` into an empty folder, `npm install`, `npm test`): 119 of 119 tests pass on Node 22.22.0; no `.env`, database, `data/` or `node_modules` tracked; the only key-looking strings are obviously fake test keys. Handout tip: a fresh clone is the best test that a repo is complete.
