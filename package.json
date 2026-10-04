@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning src/server.js",
     "dev": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --watch-path=src --watch-path=public src/server.js",
-    "test": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --test"
+    "test": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning --test",
+    "seed": "node scripts/check-node.js && node --disable-warning=ExperimentalWarning scripts/seed.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

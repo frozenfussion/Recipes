@@ -6,7 +6,10 @@ import { ConfigError, loadConfig } from './config.js';
 import { openDb } from './db.js';
 import { ApiError, sendError } from './lib/errors.js';
 import { healthRouter } from './routes/health.js';
+import { imagesRouter } from './routes/images.js';
+import { listsRouter } from './routes/lists.js';
 import { modelsRouter } from './routes/models.js';
+import { sessionsRouter } from './routes/sessions.js';
 import { settingsRouter } from './routes/settings.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -18,7 +21,7 @@ const isPhotoRoute = (req) =>
   req.method === 'POST' && (req.path === '/sessions' || /^\/sessions\/\d+\/cooked$/.test(req.path));
 
 // Building the app in a function lets tests use an in-memory database and fake AI services.
-export function createApp(db, { ai = createAi() } = {}) {
+export function createApp(db, { ai = createAi(), imagesDir = path.join(root, 'data', 'images') } = {}) {
   const app = express();
   app.disable('x-powered-by');
 
@@ -26,16 +29,22 @@ export function createApp(db, { ai = createAi() } = {}) {
   app.use('/api', healthRouter(db));
   app.use('/api', settingsRouter(db, ai));
   app.use('/api', modelsRouter(db, ai));
+  app.use('/api', listsRouter(db));
+  app.use('/api', sessionsRouter(db, { ai, imagesDir }));
   app.use('/api', (req, res) => sendError(res, 404, 'not_found', 'That API address does not exist.'));
-  app.use('/api', (err, req, res, next) => {
+  app.use('/images', imagesRouter(db, { imagesDir }));
+
+  app.use(express.static(path.join(root, 'public')));
+
+  // One place that turns every error into the standard JSON shape.
+  app.use((err, req, res, next) => {
+    if (res.headersSent) return next(err);
     if (err instanceof ApiError) return sendError(res, err.status, err.code, err.message);
     if (err.type === 'entity.too.large') return sendError(res, 413, 'too_large', 'That upload is too big. Try a smaller photo.');
     if (err.type === 'entity.parse.failed') return sendError(res, 400, 'bad_json', 'The request was not valid JSON.');
     console.error(err.message); // message only, never the whole request (it may hold a key)
     sendError(res, 500, 'server_error', 'Something went wrong on the server.');
   });
-
-  app.use(express.static(path.join(root, 'public')));
   return app;
 }
 
@@ -48,17 +57,17 @@ function fail(message) {
 function start() {
   let config;
   let db;
+  // DATA_DIR lets the tests use a temporary folder instead of the real data/ folder.
+  const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
   try {
     config = loadConfig(path.join(root, '.env'));
-    // DATA_DIR lets the tests use a temporary folder instead of the real data/ folder.
-    const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(root, 'data');
     db = openDb(path.join(dataDir, 'chefbuddy.db'));
   } catch (err) {
     fail(err instanceof ConfigError ? err.message : `Could not start: ${err.message}`);
   }
   const { port, host } = config;
 
-  const server = createApp(db).listen(port, host);
+  const server = createApp(db, { imagesDir: path.join(dataDir, 'images') }).listen(port, host);
   server.once('listening', () => {
     console.log(`Chef Buddy is running at http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`);
   });

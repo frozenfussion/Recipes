@@ -65,11 +65,13 @@ nav.tabs button[aria-current="page"] { background: var(--primary); color: var(--
 .grid.two > * { min-width: 0; }
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .row.between { justify-content: space-between; }
+.row > h2 { margin: 0; }
 .stack > * + * { margin-top: 12px; }
 .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
 .bar .grow { flex: 1; }
 .small { font-size: 0.85rem; color: var(--muted); }
 .empty { text-align: center; color: var(--muted); }
+.card > .chips { margin: 8px 0 12px; }
 .group-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 10px 0 4px; }
 
 /* ---------- Fields ---------- */
@@ -147,6 +149,7 @@ ul.ing, ol.steps { padding-left: 1.2em; margin: 0.3em 0; }
 ul.ing li::marker { color: var(--primary); }
 ol.steps li::marker { color: var(--primary); font-weight: 800; }
 ol.steps { max-width: 65ch; }
+.recipe-title { margin-top: 14px; }
 .note-box { border: 3px dashed var(--line); border-radius: var(--radius); padding: 8px 12px; margin: 10px 0; }
 
 /* ---------- Chat ---------- */

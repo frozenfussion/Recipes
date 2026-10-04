@@ -24,6 +24,13 @@ test('frontend code never uses innerHTML or other raw-HTML sinks', () => {
   }
 });
 
+test('frontend code never sets a style attribute (a strict CSP blocks them): use CSS classes', () => {
+  for (const file of jsFiles) {
+    const code = readFileSync(file, 'utf8');
+    assert.doesNotMatch(code, /\bstyle\s*:|setAttribute\(\s*['"]style['"]|cssText/, path.relative(publicDir, file));
+  }
+});
+
 test('every relative import in the frontend points at a real file', () => {
   for (const file of jsFiles) {
     const code = readFileSync(file, 'utf8');

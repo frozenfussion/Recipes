@@ -9,7 +9,62 @@ export const MIGRATIONS = [
   (db) => db.exec('SELECT 1'),
   // Version 2: settings (API keys, chosen models, theme, cached model lists).
   (db) => db.exec('CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)'),
+  // Version 3: lists, sessions (a recipe plus its chat), messages and images.
+  (db) => db.exec(`
+    CREATE TABLE lists (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE UNIQUE INDEX lists_name_nocase ON lists (name COLLATE NOCASE);
+
+    CREATE TABLE sessions (
+      id INTEGER PRIMARY KEY,
+      title TEXT NOT NULL,
+      emoji TEXT,
+      status TEXT NOT NULL CHECK (status IN ('draft', 'saved', 'cooked')),
+      list_id INTEGER REFERENCES lists(id) ON DELETE SET NULL,
+      prefs TEXT,
+      recipe TEXT,
+      duplicated_from INTEGER REFERENCES sessions(id) ON DELETE SET NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      cooked_at TEXT
+    );
+
+    CREATE TABLE messages (
+      id INTEGER PRIMARY KEY,
+      session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'note')),
+      content TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX messages_by_session ON messages (session_id, id);
+
+    CREATE TABLE images (
+      id INTEGER PRIMARY KEY,
+      session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      kind TEXT NOT NULL CHECK (kind IN ('fridge', 'cooked', 'ai')),
+      file TEXT NOT NULL,
+      mime TEXT NOT NULL CHECK (mime IN ('image/jpeg', 'image/png', 'image/webp')),
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX images_by_session ON images (session_id, kind, id);
+  `),
 ];
+
+// Runs fn inside one transaction: all of it happens, or none of it does.
+export function transaction(db, fn) {
+  db.exec('BEGIN');
+  try {
+    const result = fn();
+    db.exec('COMMIT');
+    return result;
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
+}
 
 export function openDb(file, migrations = MIGRATIONS) {
   if (file !== ':memory:') mkdirSync(path.dirname(file), { recursive: true });

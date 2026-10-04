@@ -1,16 +1,21 @@
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { openDb } from '../src/db.js';
+import { createSession } from '../src/lib/sessions.js';
 import { createApp } from '../src/server.js';
 
-// A running app on a random port with an in-memory database and fake AI services.
-// Call close() when done. req(method, path, body) returns { status, body }.
+// A running app on a random port with an in-memory database, a temporary images folder
+// and fake AI services. Call close() when done. req(method, path, body) returns { status, body, text }.
 export async function startTestApp(ai = {}) {
   const db = openDb(':memory:');
-  const server = createApp(db, { ai }).listen(0, '127.0.0.1');
+  const imagesDir = mkdtempSync(path.join(tmpdir(), 'chefbuddy-images-'));
+  const server = createApp(db, { ai, imagesDir }).listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
 
-  async function req(method, path, body) {
-    const res = await fetch(base + path, {
+  async function req(method, route, body) {
+    const res = await fetch(base + route, {
       method,
       headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -21,7 +26,31 @@ export async function startTestApp(ai = {}) {
     return { status: res.status, body: parsed, text };
   }
 
-  return { db, base, req, close: () => new Promise((resolve) => { server.close(resolve); server.closeAllConnections(); }) };
+  return {
+    db, base, req, imagesDir,
+    close: () => new Promise((resolve) => {
+      server.close(() => { rmSync(imagesDir, { recursive: true, force: true }); resolve(); });
+      server.closeAllConnections();
+    }),
+  };
+}
+
+export const sampleRecipe = (overrides = {}) => ({
+  title: 'Garlicky Chicken & Spinach Rice',
+  emoji: '🍗',
+  time_minutes: 35,
+  servings: 2,
+  tags: ['Halal', 'Nut-free'],
+  ingredients: ['400 g chicken thighs', '1 cup basmati rice', '150 g spinach'],
+  steps: ['Marinate the chicken.', 'Sear it.', 'Add rice and simmer.'],
+  shopping_list: [],
+  notes: '',
+  ...overrides,
+});
+
+// Quick way to put a session in the database for a test.
+export function addSession(db, { recipe = sampleRecipe(), ...rest } = {}) {
+  return createSession(db, { recipe, messages: [{ role: 'assistant', content: 'Here is a recipe!' }], ...rest });
 }
 
 // Fake Claude and OpenAI services. Override any method per test. Model ids here are made up.
