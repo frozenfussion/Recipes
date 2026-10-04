@@ -102,3 +102,12 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - Instruction given to Claude Code (approved plan with option 1, auto mode): confirm the package id with `winget search`, install Node.js LTS (22 or newer) with the agreements accepted, write a script if admin rights are needed, refresh PATH in its own shell (or call node by its full path), confirm `node -v` and `npm -v`, then continue Phase 0.
 - **Windows showed a permission prompt (User Account Control, "Do you want to allow this app to make changes?") during the install. Aziz clicked Yes.** Handout note: this is normal and expected when installing software. Read what is asking, and click Yes only if you started the install. Claude Code cannot click it for you.
 - Handout tip: let Claude Code do setup chores (installing tools, creating folders) and keep the human for approvals and review.
+
+## Session 1 – Phase 0 built (screenshot 09)
+- `09-claude-code-phase0-report.png`: Claude Code's Phase 0 report. Built, tested (6 of 6 tests pass), committed locally as `d2ea01b`, then stopped for review.
+- Node.js installed by Claude Code with `winget install OpenJS.NodeJS.LTS`: **v24.19.0**, npm 11.17.0 (the specs say "22 or newer", so this is fine). No admin script was needed. It refreshed PATH in its own shell; **terminals that were already open must be reopened** before they can see `node`.
+- Files: `src/server.js`, `src/db.js` (ordered migrations recorded in `schema_version`), `src/routes/health.js`, `src/lib/errors.js`, `src/config.js`, `public/index.html`, `test/db.test.js`, `test/health.test.js`. Only dependency: `express` (v5).
+- Verified by Claude Code: `npm install` 0 vulnerabilities; `/api/health` OK; unknown API path returns the standard error JSON; server listens on 127.0.0.1 only; `data/chefbuddy.db` is git-ignored.
+- **Honest "what I did not check" list** (teaching point: a good assistant tells you what it did not test): ran `node` directly, not `npm start` or `npm run dev`; did not open a real browser; did not test `HOST=0.0.0.0`; README not updated.
+- Git printed harmless LF/CRLF line-ending warnings; a `.gitattributes` file would silence them.
+- Aziz's review steps for the handout: reopen terminal, `node -v`; `npm start` and open http://localhost:3000 and /api/health; `npm test`; `npm run dev` and edit a file to see the restart; ask Claude Code to explain and to challenge its own work; `git pull --rebase` then `git push`.
