@@ -47,6 +47,14 @@ test('index.html has no inline scripts, inline styles or inline handlers (needed
   assert.doesNotMatch(html, /\son[a-z]+\s*=/i);
 });
 
+test('the theme script is a blocking script in <head>, before the page paints (no flash of the wrong theme)', () => {
+  const head = html.slice(0, html.indexOf('</head>'));
+  const tag = head.match(/<script[^>]*theme-init\.js[^>]*>/);
+  assert.ok(tag, 'theme-init.js must be loaded in <head>');
+  assert.doesNotMatch(tag[0], /defer|async|module/);
+  assert.ok(head.indexOf('theme-init.js') > head.indexOf('app.css'), 'it should come after the stylesheets are requested');
+});
+
 test('every local file index.html links to exists', () => {
   for (const match of html.matchAll(/(?:src|href)="(\/[^"]+)"/g)) {
     assert.ok(existsSync(path.join(publicDir, match[1])), `index.html links to missing ${match[1]}`);

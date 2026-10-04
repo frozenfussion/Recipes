@@ -40,7 +40,7 @@ function publicSettings(db) {
   };
 }
 
-export function settingsRouter(db, ai) {
+export function settingsRouter(db, ai, limiter) {
   const router = Router();
 
   router.get('/settings', (req, res) => res.json(publicSettings(db)));
@@ -84,7 +84,7 @@ export function settingsRouter(db, ai) {
   });
 
   // Checks a key works. Uses the key in the request if there is one (not saved), else the saved key.
-  router.post('/settings/test/:provider', async (req, res, next) => {
+  router.post('/settings/test/:provider', limiter, async (req, res, next) => {
     try {
       const service = { anthropic: 'claude', openai: 'openai' }[req.params.provider];
       if (!service) throw new ApiError(404, 'not_found', 'Unknown service.');

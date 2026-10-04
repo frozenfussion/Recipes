@@ -3,6 +3,7 @@ import { state } from './state.js';
 
 // A bare #screen hash (#home, #recipe, ...) like the mockup.
 const screens = new Map();
+const TITLES = { home: 'Cook', recipe: 'Recipe', history: 'History', saved: 'My Recipes', settings: 'Settings' };
 let rendering = 0;
 
 export function registerScreen(name, render) {
@@ -21,6 +22,7 @@ export async function show(name) {
     toast('Start a session first');
   }
   if (location.hash !== `#${name}`) history.replaceState(null, '', `#${name}`);
+  document.title = `${TITLES[name] || 'Chef Buddy'} · Chef Buddy`; // the tab title follows the screen
 
   for (const button of document.querySelectorAll('nav.tabs button')) {
     if (button.dataset.screen === name) button.setAttribute('aria-current', 'page');

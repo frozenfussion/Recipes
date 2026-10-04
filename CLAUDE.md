@@ -37,7 +37,9 @@ npm install      # install dependencies
 npm start        # run the app at http://localhost:3000
 npm run dev      # same, restarting on file changes (node --watch)
 npm test         # run the tests
+npm run seed     # add demo recipes (never runs by itself)
 ```
+All eight build phases (0 to 7) are done. See the status lines in `docs/specs/08-build-plan.md` for what was checked and what was not (the real Claude and OpenAI APIs were never called while building).
 The user runs Windows 10/11 (PowerShell or CMD). Every script, path and command must work there. Use `node:path`, no Bash-only scripts, no `rm -rf` in npm scripts.
 
 ## Folder layout

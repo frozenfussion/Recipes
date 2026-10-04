@@ -17,7 +17,7 @@ const GREETING = "Here's a recipe for you! Shout if you hit a snag. 👨‍🍳"
 
 // Sessions: History and My Recipes (list), open, edit, duplicate, delete, plus the Claude routes:
 // create a session (first recipe), chat (streamed), refine.
-export function sessionsRouter(db, { ai, imagesDir }) {
+export function sessionsRouter(db, { ai, imagesDir, limiters }) {
   const router = Router();
 
   router.get('/sessions', (req, res) => {
@@ -27,7 +27,7 @@ export function sessionsRouter(db, { ai, imagesDir }) {
 
   // Start a session: asks Claude for the first recipe from diet choices, ingredients, free text
   // and up to four fridge photos. The photos are checked, sent to Claude once, and kept as our own copy.
-  router.post('/sessions', async (req, res) => {
+  router.post('/sessions', limiters.ai, async (req, res) => {
     const input = parseCookInput(req.body);
     const photos = decodePhotos(input.photos);
     if (!input.ingredients.length && !input.want && !photos.length) {
@@ -84,7 +84,7 @@ export function sessionsRouter(db, { ai, imagesDir }) {
 
   // The AI dish photo. Only ever runs because the user pressed the button (it costs money):
   // one picture per press, at the quality chosen in Settings (low unless changed).
-  router.post('/sessions/:id/ai-photo', async (req, res) => {
+  router.post('/sessions/:id/ai-photo', limiters.ai, limiters.image, async (req, res) => {
     const id = parseId(req.params.id);
     const session = getSession(db, id);
     if (!session.recipe) throw new ApiError(400, 'no_recipe', 'This session has no recipe to make a picture of yet.');
@@ -117,7 +117,7 @@ export function sessionsRouter(db, { ai, imagesDir }) {
   // Chat. The reply streams back as Server-Sent Events: "delta" (a piece of text), then "done",
   // or "error" with a friendly message. Problems we can spot up front (no key, retired model)
   // are normal JSON errors, sent before the stream starts.
-  router.post('/sessions/:id/messages', async (req, res) => {
+  router.post('/sessions/:id/messages', limiters.ai, async (req, res) => {
     const id = parseId(req.params.id);
     const content = parseChatMessage(req.body);
     const session = getSession(db, id);
@@ -158,7 +158,7 @@ export function sessionsRouter(db, { ai, imagesDir }) {
   });
 
   // Refine: change the recipe in place (chips and/or free text). The chat gets the request and a reply.
-  router.post('/sessions/:id/refine', async (req, res) => {
+  router.post('/sessions/:id/refine', limiters.ai, async (req, res) => {
     const id = parseId(req.params.id);
     const request = parseRefine(req.body);
     const session = getSession(db, id);

@@ -5,6 +5,8 @@ import { createAi } from './ai/index.js';
 import { ConfigError, loadConfig } from './config.js';
 import { openDb } from './db.js';
 import { ApiError, sendError } from './lib/errors.js';
+import { createRateLimiter } from './lib/rate-limit.js';
+import { isLoopbackHost, requestGuard, securityHeaders } from './lib/security.js';
 import { healthRouter } from './routes/health.js';
 import { imagesRouter } from './routes/images.js';
 import { listsRouter } from './routes/lists.js';
@@ -21,16 +23,24 @@ const isPhotoRoute = (req) =>
   req.method === 'POST' && (req.path === '/sessions' || /^\/sessions\/\d+\/cooked$/.test(req.path));
 
 // Building the app in a function lets tests use an in-memory database and fake AI services.
-export function createApp(db, { ai = createAi(), imagesDir = path.join(root, 'data', 'images') } = {}) {
+export function createApp(db, {
+  ai = createAi(),
+  imagesDir = path.join(root, 'data', 'images'),
+  loopbackOnly = true,
+  // Everything that costs money shares one gate (30 a minute), pictures get a tighter one (10 a minute).
+  limiters = { ai: createRateLimiter({ limit: 30 }), image: createRateLimiter({ limit: 10 }) },
+} = {}) {
   const app = express();
   app.disable('x-powered-by');
+  app.use(securityHeaders);
+  app.use(requestGuard({ loopbackOnly }));
 
   app.use('/api', (req, res, next) => (isPhotoRoute(req) ? photoJson : smallJson)(req, res, next));
   app.use('/api', healthRouter(db));
-  app.use('/api', settingsRouter(db, ai));
+  app.use('/api', settingsRouter(db, ai, limiters.ai));
   app.use('/api', modelsRouter(db, ai));
   app.use('/api', listsRouter(db));
-  app.use('/api', sessionsRouter(db, { ai, imagesDir }));
+  app.use('/api', sessionsRouter(db, { ai, imagesDir, limiters }));
   app.use('/api', (req, res) => sendError(res, 404, 'not_found', 'That API address does not exist.'));
   app.use('/images', imagesRouter(db, { imagesDir }));
 
@@ -67,10 +77,18 @@ function start() {
   }
   const { port, host } = config;
 
-  const server = createApp(db, { imagesDir: path.join(dataDir, 'images') }).listen(port, host);
+  const app = createApp(db, { imagesDir: path.join(dataDir, 'images'), loopbackOnly: isLoopbackHost(host) });
+  const server = app.listen(port, host);
   server.once('listening', () => {
     console.log(`Chef Buddy is running at http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`);
+    if (!isLoopbackHost(host)) {
+      console.log('Heads up: other devices on your network can open this app. It has no login and it spends your API credit.');
+    }
   });
+  // Ctrl+C: stop listening and close the database cleanly.
+  for (const signal of ['SIGINT', 'SIGTERM']) {
+    process.once(signal, () => { server.close(); db.close(); process.exit(0); });
+  }
   server.once('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       fail(`Port ${port} is already in use. Close the other Chef Buddy window, or set PORT in your .env file.`);
