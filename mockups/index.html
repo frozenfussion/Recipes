@@ -108,6 +108,27 @@ ul.ing li::marker{color:var(--primary)} ol.steps li::marker{color:var(--primary)
 .status{display:inline-block;border:3px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.8rem;background:var(--pop);color:#2b1a0f}
 .warn{border:3px solid var(--line);background:var(--pop);color:#2b1a0f;border-radius:12px;padding:8px 12px;margin-top:8px;font-size:.9rem}
 
+
+/* actions, modal, toast */
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.bar .grow{flex:1}
+.sm{font-size:1rem;padding:6px 14px}
+.btn.danger{background:#d6342c;color:#fff}
+.rcard{cursor:pointer}
+.rcard:hover{transform:translate(-2px,-2px)}
+.rcard h3{margin:0}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:20;padding:16px}
+.scrim[hidden]{display:none}
+.dialog{max-width:440px;width:100%;margin:0}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--bg);border:3px solid var(--line);border-radius:999px;padding:8px 18px;font-weight:800;max-width:90vw;text-align:center}
+.toast[hidden]{display:none}
+.editbox{min-height:140px}
+.empty{text-align:center;color:var(--muted)}
+.inlineform{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.inlineform .field{flex:1;min-width:160px}
+.mgmt{border:3px dashed var(--line);border-radius:var(--radius);padding:10px 12px;margin:10px 0}
+.mgmt strong{font-family:var(--font-head);letter-spacing:var(--head-spacing);font-size:1.15rem}
+
 /* screens + nav */
 .screen{display:none}.screen.on{display:block}
 nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:4px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px;z-index:5}
@@ -181,7 +202,7 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
       <div class="card">
         <h2>2 · What have you got?</h2>
         <label class="lbl" for="ing">Ingredients in the fridge</label>
-        <div class="chips" style="margin-bottom:8px">
+        <div class="chips" id="ingChips" style="margin-bottom:8px">
           <span class="chip rm">Chicken thighs ✕</span><span class="chip rm">Rice ✕</span><span class="chip rm">Yoghurt ✕</span><span class="chip rm">Spinach ✕</span>
         </div>
         <input class="field" id="ing" placeholder="Type an ingredient and press Enter…">
@@ -195,6 +216,23 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
 
   <!-- ===== RECIPE + CHAT ===== -->
   <section class="screen" id="s-recipe">
+    <div class="bar">
+      <button class="btn ghost sm" data-go="home">← Back to ingredients</button>
+      <button class="btn alt sm" data-act="toggle-refine" id="refineBtn">✏️ Refine</button>
+      <span class="grow"></span>
+      <button class="btn ghost sm" data-act="new-session">＋ New session</button>
+    </div>
+    <div class="card" id="refinePanel" hidden>
+      <h3>Refine this recipe</h3>
+      <div class="chips" data-chips style="margin:8px 0">
+        <span class="chip" role="button" aria-pressed="false">Spicier</span><span class="chip" role="button" aria-pressed="false">Quicker</span>
+        <span class="chip" role="button" aria-pressed="false">Fewer ingredients</span><span class="chip" role="button" aria-pressed="false">Lighter</span>
+        <span class="chip" role="button" aria-pressed="false">Kid-friendly</span><span class="chip" role="button" aria-pressed="false">One-pan</span>
+        <span class="chip" role="button" aria-pressed="false">Double the servings</span>
+      </div>
+      <textarea id="refineText" placeholder="Or say it in your own words, e.g. swap the chicken for chickpeas…"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn sm" data-act="apply-refine">Update recipe</button><button class="btn ghost sm" data-act="toggle-refine">Cancel</button></div>
+    </div>
     <div class="grid two">
       <div class="card">
         <div class="photo"><span class="badge">AI-generated · what it might look like</span><button class="btn alt" style="font-size:1rem;padding:6px 14px">🎨 New photo</button></div>
@@ -204,11 +242,11 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
         <ul class="ing"><li>400 g chicken thighs</li><li>1 cup basmati rice</li><li>150 g spinach</li><li>½ cup yoghurt</li><li>3 cloves garlic</li></ul>
         <h3>Method</h3>
         <ol class="steps"><li>Marinate the chicken in yoghurt and garlic for 10 minutes.</li><li>Sear the chicken until golden, about 5 minutes per side.</li><li>Add rice and 2 cups water, cover and simmer 12 minutes.</li><li>Fold in the spinach and rest for 5 minutes.</li></ol>
-        <div class="row" style="margin-top:12px"><button class="btn">💾 Save recipe</button><button class="btn ghost">📋 Add to list</button></div>
+        <div class="row" style="margin-top:12px"><button class="btn" data-act="save-current" id="saveBtn">💾 Save recipe</button><button class="btn ghost" data-act="add-to-list">📋 Add to list</button></div>
       </div>
       <div class="card">
         <h2>Ask Chef Buddy</h2>
-        <div class="chat">
+        <div class="chat" id="chatBox">
           <div class="msg ai">Here's a recipe from what's in your fridge! Shout if you hit a snag. 👨‍🍳</div>
           <div class="msg me">The shop only had Greek yoghurt. Is that OK?</div>
           <div class="msg ai">Perfect, even better. It's thicker, so loosen it with a splash of water.</div>
@@ -221,19 +259,8 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
   </section>
 
   <!-- ===== MY RECIPES ===== -->
-  <section class="screen" id="s-saved">
-    <div class="card">
-      <div class="row" style="justify-content:space-between"><h2 style="margin:0">My Recipes</h2><button class="btn alt">＋ New list</button></div>
-      <div class="chips" style="margin:12px 0"><span class="chip" role="button" aria-pressed="true">All</span><span class="chip" role="button" aria-pressed="false">Weeknight</span><span class="chip" role="button" aria-pressed="false">Family favourites</span></div>
-      <input class="field" placeholder="🔍 Search recipes…">
-    </div>
-    <div class="grid two">
-      <div class="card rcard"><div class="thumb">🍛</div><div><h3 style="margin:0">Chicken Biryani</h3><span class="small">Halal · 60 min · Weeknight</span></div></div>
-      <div class="card rcard"><div class="thumb">🥗</div><div><h3 style="margin:0">Chickpea Salad Bowl</h3><span class="small">Vegan · 15 min · Family favourites</span></div></div>
-      <div class="card rcard"><div class="thumb">🍝</div><div><h3 style="margin:0">Garlic Prawn Linguine</h3><span class="small">Pescatarian · 25 min</span></div></div>
-      <div class="card rcard"><div class="thumb">🥘</div><div><h3 style="margin:0">Spinach &amp; Chicken Rice</h3><span class="small">Halal · 35 min · Weeknight</span></div></div>
-    </div>
-  </section>
+  <section class="screen" id="s-saved"><div id="savedRoot"></div></section>
+  <section class="screen" id="s-detail"><div id="detailRoot"></div></section>
 
   <!-- ===== SETTINGS ===== -->
   <section class="screen" id="s-settings">
@@ -265,6 +292,9 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
   </section>
 </div>
 
+<div class="scrim" id="scrim" hidden><div class="card dialog" role="dialog" aria-modal="true" id="dialog"></div></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
 <nav class="tabs" aria-label="Main">
   <button data-screen="home" aria-current="page"><span class="ic">🧑‍🍳</span>Cook</button>
   <button data-screen="recipe"><span class="ic">📖</span>Recipe</button>
@@ -281,9 +311,10 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
   function setTheme(t){root.dataset.theme=t;store('mock-theme',t);
     document.querySelectorAll('[data-set-theme]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.setTheme===t)})}
   function show(s){
+    if(s==='detail'&&!window.__open)s='saved';
     document.querySelectorAll('.screen').forEach(function(e){e.classList.toggle('on',e.id==='s-'+s)});
     document.querySelectorAll('nav.tabs button').forEach(function(b){
-      if(b.dataset.screen===s)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+      if(b.dataset.screen===(s==='detail'?'saved':s))b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
     if(location.hash!=='#'+s)history.replaceState(null,'','#'+s);
   }
   var q=new URLSearchParams(location.search);
@@ -303,6 +334,127 @@ nav.tabs button[aria-current="page"]{background:var(--primary);color:var(--on-pr
       if(grp.hasAttribute('data-chips'))t.setAttribute('aria-pressed',t.getAttribute('aria-pressed')!=='true');
     }
   });
+
+  /* ===== demo data & app behaviour (mockup only, nothing is stored) ===== */
+  var lists=[{id:'week',name:'Weeknight'},{id:'fam',name:'Family favourites'}];
+  var recipes=[
+    {id:1,title:'Chicken Biryani',emoji:'🍛',tags:['Halal'],time:60,list:'week',ing:['500 g chicken','2 cups basmati rice','2 onions','1 cup yoghurt','Biryani spice mix'],steps:['Marinate the chicken in yoghurt and spices.','Fry the onions until deep golden.','Layer chicken and par-boiled rice.','Cover tightly and cook on low for 25 minutes.']},
+    {id:2,title:'Chickpea Salad Bowl',emoji:'🥗',tags:['Vegan'],time:15,list:'fam',ing:['1 can chickpeas','1 cucumber','2 tomatoes','Lemon','Olive oil'],steps:['Drain and rinse the chickpeas.','Chop the vegetables.','Toss everything with lemon and olive oil.']},
+    {id:3,title:'Garlic Prawn Linguine',emoji:'🍝',tags:['Pescatarian'],time:25,list:'',ing:['250 g linguine','300 g prawns','4 cloves garlic','Parsley','Chilli flakes'],steps:['Boil the linguine.','Sizzle garlic and chilli in oil, add prawns.','Toss pasta through with a splash of pasta water.']},
+    {id:4,title:'Spinach & Chicken Rice',emoji:'🥘',tags:['Halal'],time:35,list:'week',ing:['400 g chicken thighs','1 cup basmati rice','150 g spinach','½ cup yoghurt','3 cloves garlic'],steps:['Marinate the chicken.','Sear until golden.','Add rice and water, simmer 12 minutes.','Fold in the spinach and rest.']}
+  ];
+  var nextId=10, activeList='all', openId=null, editing=false, renaming=false, adding=false, query='';
+  var $=function(id){return document.getElementById(id)};
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function listName(id){var l=lists.filter(function(x){return x.id===id})[0];return l?l.name:'Not in a list'}
+  function toast(msg){var t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(function(){t.hidden=true},2200)}
+  function dialog(html,onReady){$('dialog').innerHTML=html;$('scrim').hidden=false;if(onReady)onReady($('dialog'))}
+  function closeDialog(){$('scrim').hidden=true}
+  function confirmBox(title,msg,okLabel,danger,fn){
+    dialog('<h2>'+esc(title)+'</h2><p>'+esc(msg)+'</p><div class="row"><button class="btn sm'+(danger?' danger':'')+'" id="dOk">'+esc(okLabel)+'</button><button class="btn ghost sm" id="dNo">Cancel</button></div>',function(){
+      $('dOk').onclick=function(){closeDialog();fn()};$('dNo').onclick=closeDialog});
+  }
+
+  function renderSaved(){
+    var vis=recipes.filter(function(r){return (activeList==='all'||r.list===activeList)&&r.title.toLowerCase().indexOf(query.toLowerCase())>-1});
+    var h='<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">My Recipes</h2><button class="btn alt sm" data-act="new-list">＋ New list</button></div>';
+    if(adding)h+='<form class="inlineform" data-form="add-list"><input class="field" id="newListName" placeholder="Name your new list…" maxlength="40"><button class="btn sm">Create</button><button type="button" class="btn ghost sm" data-act="cancel-list">Cancel</button></form>';
+    h+='<div class="chips" style="margin:12px 0"><span class="chip" role="button" data-act="pick-list" data-id="all" aria-pressed="'+(activeList==='all')+'">All ('+recipes.length+')</span>';
+    lists.forEach(function(l){var n=recipes.filter(function(r){return r.list===l.id}).length;h+='<span class="chip" role="button" data-act="pick-list" data-id="'+l.id+'" aria-pressed="'+(activeList===l.id)+'">'+esc(l.name)+' ('+n+')</span>'});
+    h+='</div>';
+    if(activeList!=='all'){
+      if(renaming)h+='<form class="inlineform mgmt" data-form="rename-list"><input class="field" id="renameName" value="'+esc(listName(activeList))+'" maxlength="40"><button class="btn sm">Save name</button><button type="button" class="btn ghost sm" data-act="cancel-rename">Cancel</button></form>';
+      else h+='<div class="mgmt row" style="justify-content:space-between"><span>List: <strong>'+esc(listName(activeList))+'</strong></span><span class="row"><button class="btn alt sm" data-act="rename-list">✏️ Rename</button><button class="btn danger sm" data-act="delete-list">🗑 Delete list</button></span></div>';
+    }
+    h+='<input class="field" id="searchBox" placeholder="🔍 Search recipes…" value="'+esc(query)+'"></div>';
+    if(!vis.length)h+='<div class="card empty"><h3>Nothing here yet</h3><p>Cook something and tap Save, or add recipes to this list.</p><button class="btn sm" data-go="home">🍳 Start cooking</button></div>';
+    else{h+='<div class="grid two">';vis.forEach(function(r){h+='<div class="card rcard" data-act="open" data-id="'+r.id+'" tabindex="0"><div class="thumb">'+r.emoji+'</div><div><h3>'+esc(r.title)+'</h3><span class="small">'+esc(r.tags.join(' · '))+' · '+r.time+' min · '+esc(listName(r.list))+'</span></div></div>'});h+='</div>'}
+    var focusSearch=document.activeElement&&document.activeElement.id==='searchBox';
+    $('savedRoot').innerHTML=h;
+    if(focusSearch){var sb=$('searchBox');sb.focus();sb.setSelectionRange(sb.value.length,sb.value.length)}
+    var f=$('newListName')||$('renameName');if(f&&!focusSearch){f.focus();f.select&&f.select()}
+  }
+
+  function renderDetail(){
+    var r=recipes.filter(function(x){return x.id===openId})[0];if(!r){show('saved');return}
+    var h='<div class="bar"><button class="btn ghost sm" data-act="back-saved">← My Recipes</button><span class="grow"></span>';
+    if(!editing)h+='<button class="btn alt sm" data-act="edit">✏️ Edit</button><button class="btn danger sm" data-act="delete-recipe">🗑 Delete</button>';
+    h+='</div><div class="card">';
+    if(editing){
+      h+='<h2>Edit recipe</h2><label class="lbl" for="eTitle">Name</label><input class="field" id="eTitle" value="'+esc(r.title)+'">'+
+         '<label class="lbl" for="eList">List</label><select class="field" id="eList"><option value="">Not in a list</option>'+lists.map(function(l){return '<option value="'+l.id+'"'+(l.id===r.list?' selected':'')+'>'+esc(l.name)+'</option>'}).join('')+'</select>'+
+         '<label class="lbl" for="eIng">Ingredients (one per line)</label><textarea class="editbox" id="eIng">'+esc(r.ing.join('\n'))+'</textarea>'+
+         '<label class="lbl" for="eSteps">Method (one step per line)</label><textarea class="editbox" id="eSteps">'+esc(r.steps.join('\n'))+'</textarea>'+
+         '<div class="row" style="margin-top:14px"><button class="btn sm" data-act="save-edit">Save changes</button><button class="btn ghost sm" data-act="cancel-edit">Cancel</button></div>';
+    }else{
+      h+='<div class="photo"><span class="badge">'+r.emoji+' AI-generated photo goes here</span><button class="btn alt sm">🎨 New photo</button></div>'+
+         '<h2 style="margin-top:14px">'+esc(r.title)+'</h2><div class="meta"><span class="badge">⏱ '+r.time+' min</span>'+r.tags.map(function(t){return '<span class="badge">'+esc(t)+'</span>'}).join('')+'<span class="badge">📋 '+esc(listName(r.list))+'</span></div>'+
+         '<h3>You\'ll need</h3><ul class="ing">'+r.ing.map(function(i){return '<li>'+esc(i)+'</li>'}).join('')+'</ul>'+
+         '<h3>Method</h3><ol class="steps">'+r.steps.map(function(i){return '<li>'+esc(i)+'</li>'}).join('')+'</ol>'+
+         '<div class="row" style="margin-top:12px"><button class="btn sm" data-act="cook-again">🍳 Cook it again with Chef Buddy</button></div>';
+    }
+    $('detailRoot').innerHTML=h+'</div>';
+  }
+
+  function openRecipe(id){openId=id;window.__open=true;editing=false;renderDetail();show('detail')}
+  function saveCurrent(){
+    if(recipes.some(function(r){return r.title==='Garlicky Chicken & Spinach Rice'})){toast('Already in My Recipes');return}
+    recipes.unshift({id:nextId++,title:'Garlicky Chicken & Spinach Rice',emoji:'🍗',tags:['Halal','Nut-free'],time:35,list:'',ing:['400 g chicken thighs','1 cup basmati rice','150 g spinach','½ cup yoghurt','3 cloves garlic'],steps:['Marinate the chicken in yoghurt and garlic for 10 minutes.','Sear the chicken until golden, about 5 minutes per side.','Add rice and 2 cups water, cover and simmer 12 minutes.','Fold in the spinach and rest for 5 minutes.']});
+    $('saveBtn').textContent='✔ Saved';toast('Saved to My Recipes');renderSaved();
+  }
+  function newSession(){
+    $('ingChips').innerHTML='';$('want').value='';$('ing').value='';$('refineText').value='';$('refinePanel').hidden=true;
+    document.querySelectorAll('#refinePanel .chip').forEach(function(c){c.setAttribute('aria-pressed','false')});
+    $('chatBox').innerHTML='<div class="msg ai">Fresh start! Tell me what\'s in the fridge or what you fancy. 👨‍🍳</div>';
+    $('saveBtn').textContent='💾 Save recipe';show('home');toast('New session started');
+  }
+
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-act]');if(!t)return;
+    var a=t.dataset.act,id=t.dataset.id;
+    if(a==='toggle-refine'){var p=$('refinePanel');p.hidden=!p.hidden}
+    else if(a==='apply-refine'){$('refinePanel').hidden=true;toast('Chef Buddy is updating the recipe…')}
+    else if(a==='new-session')confirmBox('Start a new session?','Your ingredients, chat and this recipe will be cleared. Save the recipe first if you want to keep it.','Start new',false,newSession);
+    else if(a==='save-current')saveCurrent();
+    else if(a==='add-to-list'){
+      dialog('<h2>Add to which list?</h2><div class="chips">'+lists.map(function(l){return '<span class="chip" role="button" data-pick="'+l.id+'">'+esc(l.name)+'</span>'}).join('')+'</div><div class="row" style="margin-top:14px"><button class="btn ghost sm" id="dNo">Cancel</button></div>',function(d){
+        $('dNo').onclick=closeDialog;
+        d.querySelectorAll('[data-pick]').forEach(function(c){c.onclick=function(){saveCurrent();var r=recipes[0];if(r&&r.title==='Garlicky Chicken & Spinach Rice')r.list=c.dataset.pick;closeDialog();renderSaved();toast('Added to '+listName(c.dataset.pick))}})});
+    }
+    else if(a==='new-list'){adding=true;renaming=false;renderSaved()}
+    else if(a==='cancel-list'){adding=false;renderSaved()}
+    else if(a==='pick-list'){activeList=id;renaming=false;adding=false;renderSaved()}
+    else if(a==='rename-list'){renaming=true;renderSaved()}
+    else if(a==='cancel-rename'){renaming=false;renderSaved()}
+    else if(a==='delete-list')confirmBox('Delete "'+listName(activeList)+'"?','The recipes stay in My Recipes. Only the list is removed.','Delete list',true,function(){
+      var gone=activeList;recipes.forEach(function(r){if(r.list===gone)r.list=''});lists=lists.filter(function(l){return l.id!==gone});activeList='all';renderSaved();toast('List deleted')});
+    else if(a==='open')openRecipe(+id);
+    else if(a==='back-saved'){editing=false;window.__open=false;renderSaved();show('saved')}
+    else if(a==='edit'){editing=true;renderDetail()}
+    else if(a==='cancel-edit'){editing=false;renderDetail()}
+    else if(a==='save-edit'){
+      var r=recipes.filter(function(x){return x.id===openId})[0];
+      var lines=function(v){return v.split('\n').map(function(x){return x.trim()}).filter(Boolean)};
+      r.title=$('eTitle').value.trim()||r.title;r.list=$('eList').value;r.ing=lines($('eIng').value);r.steps=lines($('eSteps').value);
+      editing=false;renderDetail();renderSaved();toast('Changes saved');
+    }
+    else if(a==='delete-recipe'){
+      var rr=recipes.filter(function(x){return x.id===openId})[0];
+      confirmBox('Delete "'+rr.title+'"?','This removes the recipe from My Recipes. You can\'t undo it.','Delete recipe',true,function(){
+        recipes=recipes.filter(function(x){return x.id!==openId});window.__open=false;renderSaved();show('saved');toast('Recipe deleted')});
+    }
+    else if(a==='cook-again'){toast('Opening it in the recipe screen with chat…');show('recipe')}
+  });
+  document.addEventListener('submit',function(e){
+    e.preventDefault();var f=e.target.dataset.form;
+    if(f==='add-list'){var n=$('newListName').value.trim();if(!n)return;var id='l'+(nextId++);lists.push({id:id,name:n});activeList=id;adding=false;renderSaved();toast('List created')}
+    else if(f==='rename-list'){var m=$('renameName').value.trim();if(!m)return;lists.forEach(function(l){if(l.id===activeList)l.name=m});renaming=false;renderSaved();toast('List renamed')}
+  });
+  document.addEventListener('input',function(e){if(e.target.id==='searchBox'){query=e.target.value;renderSaved()}});
+  $('scrim').addEventListener('click',function(e){if(e.target===$('scrim'))closeDialog()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDialog();
+    if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.rcard')){e.preventDefault();e.target.click()}});
+  renderSaved();
 })();
 </script>
 </body>

@@ -28,3 +28,12 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - Screens: Cook, Recipe + chat, My Recipes, Settings.
 - Screenshots: `screenshots/mockup-{a|b}-{light|dark}-{home|recipe|saved|settings}.png`, plus phone-width `mockup-{a|b}-dark-phone-home.png`.
 - Pending: Aziz picks A or B (or a mix).
+
+## Session 1 – Mockup feedback round 1
+- Aziz asked: where are Back / Refine, how do I see and manage all saved recipes (edit, delete, rename lists) and how do I start a new session? Answer: they were missing; added.
+- Added to `mockups/index.html` (all clickable, demo data only, nothing stored):
+  - Recipe screen: **← Back to ingredients**, **✏️ Refine** (quick-tweak chips + free text), **＋ New session** (confirm dialog clears ingredients and chat), **Save recipe** and **Add to list**.
+  - My Recipes: filter by list, search, **New list**, **Rename list**, **Delete list** (recipes stay in All), click a recipe to open it.
+  - Recipe detail: **Edit** (name, list, ingredients, method), **Delete** (confirm dialog), **Cook it again**, **← My Recipes**.
+- Screenshots: `mockup-a-light-recipe-refine.png`, `mockup-a-light-saved-manage.png`, `mockup-a-light-recipe-detail.png`, `mockup-a-light-confirm-delete.png`.
+- Note: a mid-turn "two theme buttons" request was withdrawn by Aziz (he was looking at the wrong button) and reverted.
