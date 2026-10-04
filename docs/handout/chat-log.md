@@ -68,3 +68,25 @@ Running record of the planning chat. Screenshots live in `screenshots/`.
 - `06-claude-code-first-start.png`: Claude Code v2.1.289 started in the project folder (Sonnet 5.5, auto mode on, effort medium).
 - Handout tip: before the first prompt, press Shift+Tab until it says plan mode, so Claude Code plans before it changes anything.
 - The first prompt is in `START-HERE.md` (section 3) and was pasted into the chat as copyable text.
+
+## Session 1 – Plan mode vs auto mode (IMPORTANT handout section)
+- Screenshot `07-claude-code-plan-mode-first-prompt.png`: first prompt pasted in **plan mode** (status bar: "plan mode on"). Claude Code is reading the specs and the mockup screenshots.
+- Source: Claude Code docs, "Choose a permission mode" (checked 2026-10-04). Switch modes with **Shift+Tab**. From auto the cycle is: auto → manual → accept edits → plan → auto.
+
+| Mode | What runs without asking | Best for (per the docs) |
+|---|---|---|
+| Manual (`default`) | Reads only; asks before edits and commands | Reviewing every action, sensitive work |
+| Accept edits | Reads, file edits, simple file commands | Iterating on code you are reviewing |
+| **Plan** | Reads only. Claude researches and proposes, does not edit your code | Exploring before changing |
+| **Auto** | Everything, with a second model (a classifier) checking each action in the background | Long tasks, fewer prompts |
+| Bypass permissions | Everything, no checks | Isolated containers and VMs only |
+
+- When you approve a plan, Claude Code asks which mode to continue in, then starts editing.
+- Aziz's session started in **auto** by default (Claude Code 2.1.289), so he switched to plan mode on purpose for the first prompt.
+
+### Suggested rule of thumb for students (trainer's call, not an official rule)
+1. **Start every phase in plan mode.** Read the plan, challenge it, refine it. Nothing changes on disk yet.
+2. **After you approve the plan, switch to auto or accept edits** for the build, because the work is now defined and routine. Keep Git committed before you start, so you can undo with `git restore .` or `git log`.
+3. **Use manual mode** when the task touches secrets, deleting things, or anything you do not fully understand.
+4. **Never use bypass permissions on your own PC.**
+5. Auto mode is not a reason to stop reviewing. Run the app, read the diff (`git diff`), and ask Claude to explain.
